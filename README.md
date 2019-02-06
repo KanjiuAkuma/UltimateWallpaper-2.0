@@ -14,7 +14,7 @@ Wallpaper for Wallpaper Engine
 <p> Can be run in Wallpaper Engine, logs some information to the console. </p>
 
 - DIST:
-<p>Version to be used unless you need logs. No console, so no logging. Most performance.</p>
+<p>Main version to be used unless you need logs. No console, Most performance.</p>
 
 
 # Config file

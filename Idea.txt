@@ -1,0 +1,33 @@
+General:
+	- improve performance (Use different renderer?! eg. Vulcan?)
+		-> read some
+	- 3D
+
+- Scene
+- Effects
+
+Effect interface (like app):
+	- void update(float dt);
+	- void render();
+
+Scene class:
+	- float width, height
+	- mat4 projection
+
+Editor (settings):
+	-> wallpaper needs to be able to reload effects on the go
+	- cfg.xml not intended to be edited by user
+	- imgui for setup
+		+-----------------------+
+		|   ALL    |   CURRENT  |
+		|   THE    |  WALLPAPER |
+		| SETTINGS |			|
+		|		   |			|
+		|		   |			|
+		+-----------------------*
+
+
+Utility (even if not needed, own project (static lib)):
+	- List<T> interface
+		-> Linked List (variable size)
+		-> Array List (fixed size)

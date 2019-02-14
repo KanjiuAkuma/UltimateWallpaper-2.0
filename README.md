@@ -6,6 +6,9 @@ Wallpaper for Wallpaper Engine
 - OpenGL Version 330 or higher
 - Wallpaper Engine (https://store.steampowered.com/app/431960/Wallpaper_Engine/)
 
+# Download link
+https://drive.google.com/open?id=1fFe292uCHBYtst3FDsG0MhcC7aTqUs0v
+
 # Versions
 <p> There are 3 executables included in the dowload </p>
 

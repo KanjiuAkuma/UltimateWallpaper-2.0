@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wallpaper>
+  
+  
+<Slideshow>
+    
+    
+    
+    
+    
+  <Enable>1</Enable><ImageDirectory>D:/Media/Pictures/Wallpaper/selection</ImageDirectory><ImageDuration>30</ImageDuration><Transition>
+      
+      
+    <Type>Alpha</Type><Duration>5</Duration></Transition><AudioResponse>
+      
+      
+      
+      
+      
+    <Enable>1</Enable><BassBaseAmplifier>10</BassBaseAmplifier><BassPeakAmplifier>.1</BassPeakAmplifier><HighBaseAmplifier>1</HighBaseAmplifier><HighPeakAmplifier>.7</HighPeakAmplifier></AudioResponse></Slideshow><ParticleEffect>
+    
+    
+    
+    
+    
+  <Enable>1</Enable><ParticleCount>75</ParticleCount><Particle>
+      
+      
+      
+    <Size>
+        
+        
+        
+      <Fixed>0</Fixed><Min>.01</Min><Max>.03</Max></Size><Velocity>
+        
+        
+        
+        
+      <Locked>0</Locked><X>
+          
+          
+        <Min>-.3</Min><Max>.3</Max></X><Y>
+          
+          
+        <Min>-.3</Min><Max>.3</Max></Y><Angle>
+          
+          
+          
+        <Locked>0</Locked><Min>-100</Min><Max>100</Max></Angle></Velocity><Glow>
+        
+        
+        
+      <Enable>1</Enable><Size>
+          
+          
+        <Min>1</Min><Max>2</Max></Size><Amount>
+          
+          
+        <Min>.25</Min><Max>.6</Max></Amount></Glow></Particle><Line>
+      
+      
+      
+    <Enable>1</Enable><MaxDistance>.25</MaxDistance><Width>.001</Width></Line><MouseGravity>
+      
+      
+    <Enable>0</Enable><Strength>10</Strength></MouseGravity></ParticleEffect></Wallpaper>

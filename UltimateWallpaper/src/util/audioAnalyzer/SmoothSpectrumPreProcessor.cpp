@@ -11,6 +11,14 @@ SmoothSpectrumPreProcessor::~SmoothSpectrumPreProcessor() {
 	delete[] m_recentValues;
 }
 
+void SmoothSpectrumPreProcessor::setSmoothingFactor(const float smoothingFactor) {
+	m_smoothingFactor = smoothingFactor;
+}
+
+void SmoothSpectrumPreProcessor::setThreshold(const float threshold) {
+	m_threshold = threshold;
+}
+
 void SmoothSpectrumPreProcessor::updateSpectrum() {
 	for (int i = 0; i < m_spectrum->size - 1; i++) {
 		const float fqIn = m_inputSpectrum->data[i + 1];

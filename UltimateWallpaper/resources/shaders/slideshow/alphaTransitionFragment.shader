@@ -5,6 +5,7 @@ layout(location = 0) out vec4 color;
 
 in vec2 texCoords;
 
+uniform float u_brightnessFilter;
 uniform float u_transition;
 uniform float u_highAmplitude;
 uniform sampler2D u_tex0;
@@ -43,16 +44,7 @@ void main() {
 	}
 
 	vec3 hsv = rgb2hsv(tColor.rgb);
-	hsv.b *= 1.f + u_highAmplitude * (1.f + pow(hsv.b, 4.f));
+	hsv.b *= 1.f + u_highAmplitude * (1.f + pow(hsv.b, u_brightnessFilter));
 	color = vec4(hsv2rgb(hsv), tColor.a);
-
-	// if (texCoords.x < .75) {
-	// 	vec3 hsv = rgb2hsv(tColor.rgb);
-	// 	hsv.b *= 1.f + u_highAmplitude * (1.f + pow(hsv.b, 3.f));
-	// 	color = vec4(hsv2rgb(hsv), tColor.a);
-	// }
-	// else {
-	// 	color = tColor;
-	// }
 	
 };

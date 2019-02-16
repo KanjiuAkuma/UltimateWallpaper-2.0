@@ -152,150 +152,204 @@ void Editor::render() {
 		}
 	}
 
-	if (ImGui::CollapsingHeader("Slideshow")) {
-		bool slideShowEnable = bool(m_slideShow);
-		if (ImGui::Checkbox("Enable", &slideShowEnable)) {
-			if (slideShowEnable) {
-				m_slideShow = new SlideShow(m_audioPreProcessor->getSpectrum());
-				m_slideShow->loadSettings(m_cfg.get_child("Wallpaper.Slideshow"));
-			}
-			else {
-				delete m_slideShow;
-				m_slideShow = nullptr;	
-			}
-			m_cfg.put("Wallpaper.Slideshow.Enable", slideShowEnable);
+	if (ImGui::CollapsingHeader("Audio response")) {
+		auto smoothingFactor = m_cfg.get<float>("Wallpaper.AudioResponse.SmoothingFactor");
+		if (ImGui::DragFloat("Smoothing", &smoothingFactor, 10.f * speedMod, 0.f, 500.f)) {
+			m_audioPreProcessor->setSmoothingFactor(smoothingFactor);
+			m_cfg.put("Wallpaper.AudioResponse.SmoothingFactor", smoothingFactor);
 		}
 
-		if (slideShowEnable) {
-			ImGui::PushItemWidth(-200);
-			static char imgDir[1024];
-			static bool firstTime = true, dirValid = true, colorChanged = false;
-			if (firstTime) {
-				firstTime = false;
-				auto activeImgDir = m_cfg.get<std::string>("Wallpaper.Slideshow.ImageDirectory");
-				memcpy(imgDir, activeImgDir.c_str(), activeImgDir.size() * sizeof(char));
-			}
-
-			if (!dirValid) {
-				colorChanged = true;
-				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 0.f, 0.f, 1.f));
-			}
-			if (ImGui::InputText("Image directory", imgDir, IM_ARRAYSIZE(imgDir), ImGuiInputTextFlags_EnterReturnsTrue)) {
-				const std::string sImgDir = std::string(imgDir);
-				std::string searchPath = sImgDir + "/*.*";
-
-				WIN32_FIND_DATA fd;
-				HANDLE hFind = ::FindFirstFile(searchPath.c_str(), &fd);
-				dirValid = hFind != INVALID_HANDLE_VALUE;
-				if (dirValid) {
-					m_slideShow->setImageDirectory(sImgDir);
-					m_cfg.put("Wallpaper.Slideshow.ImageDirectory", sImgDir);
-				}
-			}
-			if (colorChanged) {
-				colorChanged = false;
-				ImGui::PopStyleColor();
-			}
-
-			static int durBuf[3];
-			int dur = m_cfg.get<int>("Wallpaper.Slideshow.ImageDuration");
-			durBuf[2] = dur % 60;
-			dur /= 60;
-			durBuf[1] = dur % 60;
-			durBuf[0] = dur / 60;
-			bool durChanged = false;
-			durChanged |= ImGui::DragInt3("Image duration (hh:mm:ss)", &durBuf[0], 1, 0, 59, "%d");
-
-			ImGui::PopItemWidth();
-
-			if (ImGui::TreeNode("Transition")) {
-				static char* transitions[]{ "Alpha", "Not Alpha" };
-				int selection = 0;
-				std::string tranType = m_cfg.get<std::string>("Wallpaper.Slideshow.Transition.Type");
-				if (tranType != "Alpha") {
-					selection = 1;
-				}
-
-				if (ImGui::Combo("Type", &selection, transitions, 2)) {
-					APP_INFO("Changed transition type to {}", transitions[selection]);
-				}
-
-				float tDur = m_cfg.get<float>("Wallpaper.Slideshow.Transition.Duration");
-				if (ImGui::DragFloat("Duration", &tDur, speedMod, 0.1f, 100.f)) {
-					m_slideShow->setTransitionDuration(tDur);
-					m_cfg.put("Wallpaper.Slideshow.Transition.Duration", tDur);
-				}
-				ImGui::TreePop();
-			}
-
-			if (durChanged) {
-				const int durNew = durBuf[2] + durBuf[1] * 60 + durBuf[0] * 3600;
-				m_slideShow->setImageDuration(durNew);
-				m_cfg.put("Wallpaper.Slideshow.ImageDuration", durNew);
-			}
-
-			bool audioResponseEnable = m_cfg.get<bool>("Wallpaper.Slideshow.AudioResponse.Enable");
-			if (ImGui::Checkbox("Audio response", &audioResponseEnable)) {
-				m_slideShow->setAudioResponseEnable(audioResponseEnable);
-				m_cfg.put("Wallpaper.Slideshow.AudioResponse.Enable", audioResponseEnable);
-			}
-
-			if (audioResponseEnable) {
-				auto bassPeakAmplifier = m_cfg.get<float>("Wallpaper.Slideshow.AudioResponse.BassPeakAmplifier");
-				ImGui::PushItemWidth(-75);
-				if (ImGui::DragFloat("Bass peak", &bassPeakAmplifier, .1f * speedMod, .01f, 10.f)) {
-					m_slideShow->setBassPeakAmplifier(bassPeakAmplifier);
-					m_cfg.put("Wallpaper.Slideshow.AudioResponse.BassPeakAmplifier", bassPeakAmplifier);
-				}
-
-				auto highPeakAmplifier = m_cfg.get<float>("Wallpaper.Slideshow.AudioResponse.HighPeakAmplifier");
-				if (ImGui::DragFloat("High peak", &highPeakAmplifier, .1f * speedMod, .01f, 10.f)) {
-					m_slideShow->setHighPeakAmplifier(highPeakAmplifier);
-					m_cfg.put("Wallpaper.Slideshow.AudioResponse.HighPeakAmplifier", highPeakAmplifier);
-				}
-				ImGui::PopItemWidth();
-
-				if (ImGui::TreeNode("Advanced")) {
-					ImGui::PushItemWidth(-75);
-					auto bassBaseAmplifier = m_cfg.get<float>("Wallpaper.Slideshow.AudioResponse.BassBaseAmplifier");
-					if (ImGui::DragFloat("Bass base", &bassBaseAmplifier, .1f * speedMod, .01f, 10.f)) {
-						m_slideShow->setBassBaseAmplifier(bassBaseAmplifier);
-						m_cfg.put("Wallpaper.Slideshow.AudioResponse.BassBaseAmplifier", bassBaseAmplifier);
-					}
-
-					auto highBaseAmplifier = m_cfg.get<float>("Wallpaper.Slideshow.AudioResponse.HighBaseAmplifier");
-					if (ImGui::DragFloat("High base", &highBaseAmplifier, .1f * speedMod, .01f, 10.f)) {
-						m_slideShow->setHighBaseAmplifier(highBaseAmplifier);
-						m_cfg.put("Wallpaper.Slideshow.AudioResponse.HighBaseAmplifier", highBaseAmplifier);
-					}
-					ImGui::PopItemWidth();
-
-					ImGui::TreePop();
-				}
-			}
+		auto threshold = m_cfg.get<float>("Wallpaper.AudioResponse.Threshold");
+		if (ImGui::DragFloat("Threshold", &threshold, 0.1f * speedMod, 0.f, 5.f)) {
+			m_audioPreProcessor->setThreshold(threshold);
+			m_cfg.put("Wallpaper.AudioResponse.Threshold", threshold);
 		}
 	}
 
+	if (ImGui::CollapsingHeader("Slideshow")) {
+		renderSlideShowSettings(speedMod);
+	}
+
 	if (ImGui::CollapsingHeader("Particle Effect")) {
-		bool particleEffectEnable = bool(m_particleEffect);
-		if (ImGui::Checkbox("Enable", &particleEffectEnable)) {
-			if (particleEffectEnable) {
-				m_particleEffect = new ParticleEffect();
-				m_particleEffect->loadSettings(m_cfg.get_child("Wallpaper.ParticleEffect"));
-			}
-			else {
-				delete m_particleEffect;
-				m_particleEffect = nullptr;
-			}
+		renderParticleEffectSettings(speedMod);
+	}
+
+	// clipping
+	const float clipRange = 30.f;
+	wpos = ImGui::GetWindowPos();
+	ImVec2 wsize = ImGui::GetWindowSize();
+
+	if (!ImGui::IsMouseDown(0)) {
+		if (wpos.x - clipRange < 0.f) {
+			wpos.x = 0.f;
+			clip = true;
+		}
+		else if (m_windowWidth - wsize.x - clipRange < wpos.x) {
+			wpos.x = m_windowWidth - wsize.x;
+			clip = true;
 		}
 
-		ImGui::PushItemWidth(-110);
+		if (wpos.y - clipRange < 0.f) {
+			wpos.y = 0.f;
+			clip = true;
+		}
+		else if (m_windowHeight - wsize.y - clipRange < wpos.y) {
+			wpos.y = m_windowHeight - wsize.y;
+			clip = true;
+		}
+	}
+
+	ImGui::End();
+
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void Editor::renderSlideShowSettings(const float speedMod) {
+	bool slideShowEnable = m_cfg.get<bool>("Wallpaper.Slideshow.Enable");
+	if (ImGui::Checkbox("Slideshow enable", &slideShowEnable)) {
+		APP_INFO("Slide show enable {}", slideShowEnable);
+		if (slideShowEnable) {
+			m_slideShow = new SlideShow(m_audioPreProcessor->getSpectrum());
+			m_slideShow->loadSettings(m_cfg.get_child("Wallpaper.Slideshow"));
+		}
+		else {
+			delete m_slideShow;
+			m_slideShow = nullptr;
+		}
+		m_cfg.put("Wallpaper.Slideshow.Enable", slideShowEnable);
+	}
+
+	if (slideShowEnable) {
+		static char imgDir[1024];
+		static bool firstTime = true, dirValid = true, colorChanged = false;
+		if (firstTime) {
+			firstTime = false;
+			auto activeImgDir = m_cfg.get<std::string>("Wallpaper.Slideshow.ImageDirectory");
+			memcpy(imgDir, activeImgDir.c_str(), activeImgDir.size() * sizeof(char));
+		}
+
+		if (!dirValid) {
+			colorChanged = true;
+			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 0.f, 0.f, 1.f));
+		}
+		if (ImGui::InputText("Image directory", imgDir, IM_ARRAYSIZE(imgDir), ImGuiInputTextFlags_EnterReturnsTrue)) {
+			const std::string sImgDir = std::string(imgDir);
+			std::string searchPath = sImgDir + "/*.*";
+
+			WIN32_FIND_DATA fd;
+			HANDLE hFind = ::FindFirstFile(searchPath.c_str(), &fd);
+			dirValid = hFind != INVALID_HANDLE_VALUE;
+			if (dirValid) {
+				m_slideShow->setImageDirectory(sImgDir);
+				m_cfg.put("Wallpaper.Slideshow.ImageDirectory", sImgDir);
+			}
+		}
+		if (colorChanged) {
+			colorChanged = false;
+			ImGui::PopStyleColor();
+		}
+
+		static int durBuf[3];
+		int dur = m_cfg.get<int>("Wallpaper.Slideshow.ImageDuration");
+		durBuf[2] = dur % 60;
+		dur /= 60;
+		durBuf[1] = dur % 60;
+		durBuf[0] = dur / 60;
+		bool durChanged = false;
+		durChanged |= ImGui::DragInt3("Image duration (hh:mm:ss)", &durBuf[0], 1, 0, 59, "%d");
+
+		if (ImGui::TreeNode("Transition")) {
+			static char* transitions[]{ "Alpha", "Not Alpha" };
+			int selection = 0;
+			const std::string tranType = m_cfg.get<std::string>("Wallpaper.Slideshow.Transition.Type");
+			if (tranType != "Alpha") {
+				selection = 1;
+			}
+
+			if (ImGui::Combo("Type", &selection, transitions, 2)) {
+				APP_INFO("Changed transition type to {}", transitions[selection]);
+			}
+
+			auto tDur = m_cfg.get<float>("Wallpaper.Slideshow.Transition.Duration");
+			if (ImGui::DragFloat("Duration", &tDur, speedMod, 0.1f, 100.f)) {
+				m_slideShow->setTransitionDuration(tDur);
+				m_cfg.put("Wallpaper.Slideshow.Transition.Duration", tDur);
+			}
+			ImGui::TreePop();
+		}
+
+		if (durChanged) {
+			const int durNew = durBuf[2] + durBuf[1] * 60 + durBuf[0] * 3600;
+			m_slideShow->setImageDuration(durNew);
+			m_cfg.put("Wallpaper.Slideshow.ImageDuration", durNew);
+		}
+
+		bool audioResponseEnable = m_cfg.get<bool>("Wallpaper.Slideshow.AudioResponse.Enable");
+		if (ImGui::Checkbox("Slideshow audio response", &audioResponseEnable)) {
+			m_slideShow->setAudioResponseEnable(audioResponseEnable);
+			m_cfg.put("Wallpaper.Slideshow.AudioResponse.Enable", audioResponseEnable);
+		}
+
+		if (audioResponseEnable) {
+			auto bassPeakAmplifier = m_cfg.get<float>("Wallpaper.Slideshow.AudioResponse.BassPeakAmplifier");
+			if (ImGui::DragFloat("Bass peak", &bassPeakAmplifier, .1f * speedMod, 0.f, 10.f)) {
+				m_slideShow->setBassPeakAmplifier(bassPeakAmplifier);
+				m_cfg.put("Wallpaper.Slideshow.AudioResponse.BassPeakAmplifier", bassPeakAmplifier);
+			}
+
+			auto highPeakAmplifier = m_cfg.get<float>("Wallpaper.Slideshow.AudioResponse.HighPeakAmplifier");
+			if (ImGui::DragFloat("High peak", &highPeakAmplifier, .1f * speedMod, 0.f, 10.f)) {
+				m_slideShow->setHighPeakAmplifier(highPeakAmplifier);
+				m_cfg.put("Wallpaper.Slideshow.AudioResponse.HighPeakAmplifier", highPeakAmplifier);
+			}
+
+			if (ImGui::TreeNode("Advanced")) {
+				auto bassBaseAmplifier = m_cfg.get<float>("Wallpaper.Slideshow.AudioResponse.BassBaseAmplifier");
+				if (ImGui::DragFloat("Bass base", &bassBaseAmplifier, .1f * speedMod, .01f, 20.f)) {
+					m_slideShow->setBassBaseAmplifier(bassBaseAmplifier);
+					m_cfg.put("Wallpaper.Slideshow.AudioResponse.BassBaseAmplifier", bassBaseAmplifier);
+				}
+
+				auto highBaseAmplifier = m_cfg.get<float>("Wallpaper.Slideshow.AudioResponse.HighBaseAmplifier");
+				if (ImGui::DragFloat("High base", &highBaseAmplifier, .1f * speedMod, .01f, 20.f)) {
+					m_slideShow->setHighBaseAmplifier(highBaseAmplifier);
+					m_cfg.put("Wallpaper.Slideshow.AudioResponse.HighBaseAmplifier", highBaseAmplifier);
+				}
+
+				auto brightnessFilter = m_cfg.get<float>("Wallpaper.Slideshow.AudioResponse.BrightnessFilter");
+				if (ImGui::DragFloat("Brightness Filter", &brightnessFilter, 1.f * speedMod, 0.f, 10.f)) {
+					m_slideShow->setBrightnessFilter(brightnessFilter);
+					m_cfg.put("Wallpaper.Slideshow.AudioResponse.BrightnessFilter", brightnessFilter);
+				}
+
+				ImGui::TreePop();
+			}
+		}
+	}
+}
+
+void Editor::renderParticleEffectSettings(const float speedMod) {
+	bool particleEffectEnable = m_cfg.get<bool>("Wallpaper.ParticleEffect.Enable");
+	if (ImGui::Checkbox("Particle effect enable", &particleEffectEnable)) {
+		APP_INFO("Particle effect enable {}", particleEffectEnable);
+		if (particleEffectEnable) {
+			m_particleEffect = new ParticleEffect(m_audioPreProcessor->getSpectrum());
+			m_particleEffect->loadSettings(m_cfg.get_child("Wallpaper.ParticleEffect"));
+		}
+		else {
+			delete m_particleEffect;
+			m_particleEffect = nullptr;
+		}
+		m_cfg.put("Wallpaper.ParticleEffect.Enable", particleEffectEnable);
+	}
+
+	if (particleEffectEnable) {
 		int particleCount = m_cfg.get<int>("Wallpaper.ParticleEffect.ParticleCount");
 		if (ImGui::DragInt("Particle count", &particleCount, 1, 1, 500)) {
 			m_particleEffect->setParticleCount(particleCount);
 			m_cfg.put("Wallpaper.ParticleEffect.ParticleCount", particleCount);
 		}
-		ImGui::PopItemWidth();
 
 		bool fixedSize = m_cfg.get<bool>("Wallpaper.ParticleEffect.Particle.Size.Fixed");
 		if (ImGui::Checkbox("Fixed size", &fixedSize)) {
@@ -316,7 +370,6 @@ void Editor::render() {
 			auto sizeMin = m_cfg.get<float>("Wallpaper.ParticleEffect.Particle.Size.Min");
 			auto sizeMax = m_cfg.get<float>("Wallpaper.ParticleEffect.Particle.Size.Max");
 
-			ImGui::PushItemWidth(-80);
 			if (ImGui::DragFloat("Size min", &sizeMin, .01f * speedMod, .001f, .5f)) {
 				if (sizeMax < sizeMin) {
 					m_cfg.put("Wallpaper.ParticleEffect.Particle.Size.Max", sizeMin);
@@ -332,7 +385,6 @@ void Editor::render() {
 				m_particleEffect->setSize(sizeMin, sizeMax);
 				m_cfg.put("Wallpaper.ParticleEffect.Particle.Size.Max", sizeMax);
 			}
-			ImGui::PopItemWidth();
 
 			if (ImGui::Button("Re-init sizes")) {
 				m_particleEffect->reInitSizes();
@@ -370,7 +422,6 @@ void Editor::render() {
 			auto velMinY = m_cfg.get<float>("Wallpaper.ParticleEffect.Particle.Velocity.Y.Min");
 			auto velMaxY = m_cfg.get<float>("Wallpaper.ParticleEffect.Particle.Velocity.Y.Max");
 
-			ImGui::PushItemWidth(-90);
 			if (ImGui::DragFloat("X min", &velMinX, .01f * speedMod, -.75f, .75f)) {
 				if (velMaxX < velMinX) {
 					velMaxX = velMinX;
@@ -407,7 +458,6 @@ void Editor::render() {
 				m_cfg.put("Wallpaper.ParticleEffect.Particle.Velocity.Y.Max", velMaxY);
 			}
 
-			ImGui::PopItemWidth();
 		}
 
 		if (ImGui::Button("Re-init velocities")) {
@@ -419,15 +469,15 @@ void Editor::render() {
 		if (ImGui::Checkbox("Lock direction", &angleVelLock)) {
 			const auto angleVel = m_cfg.get<float>("Wallpaper.ParticleEffect.Particle.Velocity.Angle.Max");
 			m_cfg.put("Wallpaper.ParticleEffect.Particle.Velocity.Angle.Locked", angleVelLock);
-			m_cfg.put("Wallpaper.ParticleEffect.Particle.Velocity.Angle.Min", angleVel);
+			m_cfg.put("Wallpaper.ParticleEffect.Particle.Velocity.Angle.Min", -angleVel);
 			m_particleEffect->setAngleVelocity(-angleVel, angleVel);
 		}
 
 		if (angleVelLock) {
 			auto angleVel = m_cfg.get<float>("Wallpaper.ParticleEffect.Particle.Velocity.Angle.Max");
 			if (ImGui::DragFloat("Speed", &angleVel, 1.f * speedMod, -360.f, 360.f)) {
-				m_particleEffect->setVelocityY(-angleVel, angleVel);
-				m_cfg.put("Wallpaper.ParticleEffect.Particle.Velocity.Angle.Min", angleVel);
+				m_particleEffect->setAngleVelocity(-angleVel, angleVel);
+				m_cfg.put("Wallpaper.ParticleEffect.Particle.Velocity.Angle.Min", -angleVel);
 				m_cfg.put("Wallpaper.ParticleEffect.Particle.Velocity.Angle.Max", angleVel);
 			}
 		}
@@ -518,7 +568,7 @@ void Editor::render() {
 				}
 
 				if (ImGui::Button("Re init glow amount")) {
-					m_particleEffect->reInitGlowAmount();				
+					m_particleEffect->reInitGlowAmount();
 				}
 			}
 
@@ -564,35 +614,49 @@ void Editor::render() {
 
 			ImGui::TreePop();
 		}
+
+		bool audioResponseEnable = m_cfg.get<bool>("Wallpaper.ParticleEffect.AudioResponse.Enable");
+		if (ImGui::Checkbox("Particle effect audio response enable", &audioResponseEnable)) {
+			m_particleEffect->setAudioResponseEnable(audioResponseEnable);
+			m_cfg.put("Wallpaper.ParticleEffect.AudioResponse.Enable", audioResponseEnable);
+		}
+
+		if (audioResponseEnable) {
+			auto bassPeakAmplifier = m_cfg.get<float>("Wallpaper.ParticleEffect.AudioResponse.BassPeakAmplifier");
+			if (ImGui::DragFloat("Bass peak", &bassPeakAmplifier, .1f * speedMod, 0.f, 10.f)) {
+				m_particleEffect->setBassPeakAmplifier(bassPeakAmplifier);
+				m_cfg.put("Wallpaper.ParticleEffect.AudioResponse.BassPeakAmplifier", bassPeakAmplifier);
+			}
+
+			auto highPeakAmplifier = m_cfg.get<float>("Wallpaper.ParticleEffect.AudioResponse.HighPeakAmplifier");
+			if (ImGui::DragFloat("High peak", &highPeakAmplifier, .1f * speedMod, 0.f, 10.f)) {
+				m_particleEffect->setHighPeakAmplifier(highPeakAmplifier);
+				m_cfg.put("Wallpaper.ParticleEffect.AudioResponse.HighPeakAmplifier", highPeakAmplifier);
+			}
+
+			if (ImGui::TreeNode("Advanced")) {
+				auto bassBaseAmplifier = m_cfg.get<float>("Wallpaper.ParticleEffect.AudioResponse.BassBaseAmplifier");
+				if (ImGui::DragFloat("Bass base", &bassBaseAmplifier, .1f * speedMod, .01f, 20.f)) {
+					m_particleEffect->setBassBaseAmplifier(bassBaseAmplifier);
+					m_cfg.put("Wallpaper.ParticleEffect.AudioResponse.BassBaseAmplifier", bassBaseAmplifier);
+				}
+
+				auto highBaseAmplifier = m_cfg.get<float>("Wallpaper.ParticleEffect.AudioResponse.HighBaseAmplifier");
+				if (ImGui::DragFloat("High base", &highBaseAmplifier, .1f * speedMod, .01f, 20.f)) {
+					m_particleEffect->setHighBaseAmplifier(highBaseAmplifier);
+					m_cfg.put("Wallpaper.ParticleEffect.AudioResponse.HighBaseAmplifier", highBaseAmplifier);
+				}
+
+				auto colorFilter = m_cfg.get<float>("Wallpaper.ParticleEffect.AudioResponse.ColorFilter");
+				if (ImGui::DragFloat("Color filter", &colorFilter, 1.f * speedMod, 0.f, 10.f)) {
+					m_particleEffect->setColorFilter(colorFilter);
+					m_cfg.put("Wallpaper.ParticleEffect.AudioResponse.ColorFilter", colorFilter);
+				}
+
+				ImGui::TreePop();
+			}
+		}
 	}
-
-	wpos = ImGui::GetWindowPos();
-	ImVec2 wsize = ImGui::GetWindowSize();
-
-	if (!ImGui::IsMouseDown(0)) {
-		if (wpos.x - 20.f < 0.f) {
-			wpos.x = 0.f;
-			clip = true;
-		}
-		else if (m_windowWidth - wsize.x - 20.f < wpos.x) {
-			wpos.x = m_windowWidth - wsize.x;
-			clip = true;
-		}
-
-		if (wpos.y - 20.f < 0.f) {
-			wpos.y = 0.f;
-			clip = true;
-		}
-		else if (m_windowHeight - wsize.y - 20.f < wpos.y) {
-			wpos.y = m_windowHeight - wsize.y;
-			clip = true;
-		}
-	}
-
-	ImGui::End();
-
-	ImGui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void Editor::loadSettings(const std::string& name) {
@@ -611,7 +675,7 @@ void Editor::loadSettings(const std::string& name) {
 
 	if (m_cfg.get<bool>("Wallpaper.ParticleEffect.Enable")) {
 		if (!m_particleEffect) {
-			m_particleEffect = new ParticleEffect();
+			m_particleEffect = new ParticleEffect(m_audioPreProcessor->getSpectrum());
 		}
 		m_particleEffect->loadSettings(m_cfg.get_child("Wallpaper.ParticleEffect"));
 	}

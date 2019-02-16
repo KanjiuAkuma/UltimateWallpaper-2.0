@@ -10,6 +10,9 @@ out vec4 color;
 
 uniform mat4 u_mvp;
 
+uniform vec2 u_audioAmplitude;
+uniform float u_colorFilter;
+
 uniform samplerBuffer u_variables;
 uniform samplerBuffer u_colors;
 uniform samplerBuffer u_positions;
@@ -56,7 +59,10 @@ void main() {
 	}
 
 	// gl_Position = u_proj * u_view * vec4(position + vec2(px, py), 0.f, 1.f);
+	position *= 1.f + u_audioAmplitude.x * (1.f + pow(1.f - col.b, u_colorFilter));
 	position = rotate(position, pos.z);
 	gl_Position = u_mvp * vec4(position + pos.xy, 0.f, 1.f);
+	
+	col.b *= 1.f + u_audioAmplitude.y * (1.f + pow(col.b, u_colorFilter));
 	color = vec4(hsv2rgb(col), alpha);
 }

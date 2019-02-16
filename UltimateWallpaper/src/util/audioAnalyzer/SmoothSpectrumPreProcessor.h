@@ -5,6 +5,10 @@ class SmoothSpectrumPreProcessor final : public SpectrumPreProcessor {
 public:
 	explicit SmoothSpectrumPreProcessor(float smoothingFactor, float threshold);
 	~SmoothSpectrumPreProcessor() override;
+	
+	void setSmoothingFactor(float smoothingFactor);
+	void setThreshold(float threshold);
+
 	void updateSpectrum() override;
 
 private:

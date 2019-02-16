@@ -6,7 +6,7 @@
 
 #include "slideshow/SlideShow.h"
 #include "particleEffect/ParticleEffect.h"
-#include "util/audioAnalyzer/SpectrumPreProcessor.h"
+#include "util/audioAnalyzer/SmoothSpectrumPreProcessor.h"
 
 using namespace JApp;
 
@@ -26,7 +26,7 @@ protected:
 	float m_sceneWidth = 1.f, m_sceneHeight = 1.f;
 
 	AudioStreamReader* m_audioStreamReader = AudioStreamReader::getInstance();
-	SpectrumPreProcessor* m_audioPreProcessor;
+	SmoothSpectrumPreProcessor* m_audioPreProcessor;
 	SlideShow* m_slideShow = nullptr;
 	ParticleEffect* m_particleEffect = nullptr;
 };

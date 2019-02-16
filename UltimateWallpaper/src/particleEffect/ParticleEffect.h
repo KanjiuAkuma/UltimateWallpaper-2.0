@@ -27,8 +27,13 @@ class ParticleEffect : public Configurable {
 	Renderer::Shader* m_lineShader;
 	Renderer::VertexArray* m_lineVertexArray = new Renderer::VertexArray();
 
+	bool m_audioResponseEnable = false;
+	Spectrum* m_audioSpectrum;
+	float m_bassBaseAmplifier = 0.f, m_bassPeakAmplifier = 0.f;
+	float m_highBaseAmplifier = 0.f, m_highPeakAmplifier = 0.f;
+
 public:
-	ParticleEffect();
+	ParticleEffect(Spectrum* spectrum);
 	~ParticleEffect();
 
 	void update(float dt, const glm::vec2& mousePos, float windowWidth, float windowHeight) const;
@@ -62,6 +67,13 @@ public:
 	void setLineMaxDistance(float lineMaxDistance) const;
 	void setMouseGravityEnable(bool mouseGravityEnable);
 	void setMouseGravityStrength(float mouseGravityStrength);
+
+	void setAudioResponseEnable(bool audioResponseEnable);
+	void setBassPeakAmplifier(float peakAmplifier);
+	void setHighPeakAmplifier(float peakAmplifier);
+	void setBassBaseAmplifier(float baseAmplifier);
+	void setHighBaseAmplifier(float baseAmplifier);
+	void setColorFilter(float colorFilter) const;
 	#endif
 
 private:

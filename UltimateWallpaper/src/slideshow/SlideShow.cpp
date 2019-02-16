@@ -53,10 +53,10 @@ void SlideShow::loadSettings(boost::property_tree::ptree& configuration) {
 	const std::string tType = configuration.get<std::string>("Transition.Type");
 	delete m_transition;
 	if (tType == "Alpha") {
-		m_transition = new AlphaTransition(configuration.get<float>("Transition.Duration"));
+		m_transition = new AlphaTransition(configuration.get<float>("Transition.Duration"), configuration.get<float>("AudioResponse.BrightnessFilter"));
 	}
 	else {
-		m_transition = new AlphaTransition(configuration.get<float>("Transition.Duration"));
+		m_transition = new AlphaTransition(configuration.get<float>("Transition.Duration"), configuration.get<float>("AudioResponse.BrightnessFilter"));
 	}
 	m_updateInterval = m_imageDuration + m_transition->getDuration();
 
@@ -65,6 +65,7 @@ void SlideShow::loadSettings(boost::property_tree::ptree& configuration) {
 	m_bassPeakAmplifier = configuration.get<float>("AudioResponse.BassPeakAmplifier");
 	m_highBaseAmplifier = configuration.get<float>("AudioResponse.HighBaseAmplifier");
 	m_highPeakAmplifier = configuration.get<float>("AudioResponse.HighPeakAmplifier");
+
 	// load images
 	setImageDirectory(configuration.get<std::string>("ImageDirectory"));
 }
@@ -149,6 +150,10 @@ void SlideShow::setBassBaseAmplifier(const float baseAmplifier) {
 
 void SlideShow::setHighBaseAmplifier(const float baseAmplifier) {
 	m_highBaseAmplifier = baseAmplifier;
+}
+
+void SlideShow::setBrightnessFilter(const float brightnessFilter) const {
+	m_transition->setBrightnessFilter(brightnessFilter);
 }
 
 #endif

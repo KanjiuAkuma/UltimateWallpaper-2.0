@@ -2,7 +2,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-AlphaTransition::AlphaTransition(const float duration)
+AlphaTransition::AlphaTransition(const float duration, const float brightnessFilter)
 	: Transition(1.f / duration, duration, "Alpha")
 {
 	using namespace Renderer;
@@ -35,6 +35,8 @@ AlphaTransition::AlphaTransition(const float duration)
 	m_mesh = new Mesh(va, vb, vbl, ib);
 
 	m_shader = Shader::fromFiles("resources/shaders/slideShow/alphaTransitionVertex.shader", "resources/shaders/slideShow/alphaTransitionFragment.shader");
+	m_shader->bind();
+	m_shader->setUniform1f("u_brightnessFilter", brightnessFilter);
 }
 AlphaTransition::~AlphaTransition() {
 	delete m_mesh;
@@ -54,6 +56,11 @@ void AlphaTransition::setTex1Slot(const unsigned int tex1Slot) {
 void AlphaTransition::setDuration(const float duration) {
 	m_duration = duration;
 	m_speed = 1.f / duration;
+}
+
+void AlphaTransition::setBrightnessFilter(const float brightnessFilter) {
+	m_shader->bind();
+	m_shader->setUniform1f("u_brightnessFilter", brightnessFilter);
 }
 
 void AlphaTransition::render(const glm::mat4 mvp, const float bassAmplitude, const float highAmplitude) const {

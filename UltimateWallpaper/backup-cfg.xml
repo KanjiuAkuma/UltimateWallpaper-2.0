@@ -1,29 +1,35 @@
-﻿<Wallpaper>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Wallpaper>
+  <AudioResponse>
+    <SmoothingFactor>100</SmoothingFactor>
+    <Threshold>0.200000003</Threshold>
+  </AudioResponse>
   <FpsCounter>
-    <Enable>1</Enable>
+    <Enable>true</Enable>
     <Position>
-      <X>20</X>
-      <Y>20</Y>
+      <X>0</X>
+      <Y>1031</Y>
     </Position>
   </FpsCounter>
   <Slideshow>
-    <Enable>1</Enable>
-    <ImageDirectory>D:/Media/Pictures/Wallpaper/selection</ImageDirectory>
-    <ImageDuration>30</ImageDuration>
+    <Enable>true</Enable>
+    <ImageDirectory>resources/defaultImages</ImageDirectory>
+    <ImageDuration>150</ImageDuration>
     <Transition>
       <Type>Alpha</Type>
-      <Duration>5</Duration>
+      <Duration>7.5</Duration>
     </Transition>
     <AudioResponse>
-      <Enable>1</Enable>
+      <Enable>true</Enable>
       <BassBaseAmplifier>10</BassBaseAmplifier>
-      <BassPeakAmplifier>.1</BassPeakAmplifier>
+      <BassPeakAmplifier>0.0700000003</BassPeakAmplifier>
       <HighBaseAmplifier>1</HighBaseAmplifier>
-      <HighPeakAmplifier>.7</HighPeakAmplifier>
+      <HighPeakAmplifier>0.5</HighPeakAmplifier>
+      <BrightnessFilter>4</BrightnessFilter>
     </AudioResponse>
   </Slideshow>
   <ParticleEffect>
-    <Enable>1</Enable>
+    <Enable>true</Enable>
     <ParticleCount>75</ParticleCount>
     <Particle>
       <Size>
@@ -32,23 +38,23 @@
         <Max>.03</Max>
       </Size>
       <Velocity>
-        <Locked>0</Locked>
+        <Locked>true</Locked>
         <X>
-          <Min>-.3</Min>
-          <Max>.3</Max>
+          <Min>-0.349999994</Min>
+          <Max>0.349999994</Max>
         </X>
         <Y>
-          <Min>-.3</Min>
-          <Max>.3</Max>
+          <Min>-0.349999994</Min>
+          <Max>0.349999994</Max>
         </Y>
         <Angle>
-          <Locked>0</Locked>
-          <Min>-100</Min>
-          <Max>100</Max>
+          <Locked>true</Locked>
+          <Min>-140</Min>
+          <Max>140</Max>
         </Angle>
       </Velocity>
       <Glow>
-        <Enable>1</Enable>
+        <Enable>true</Enable>
         <Size>
           <Min>1</Min>
           <Max>2</Max>
@@ -60,13 +66,21 @@
       </Glow>
     </Particle>
     <Line>
-      <Enable>1</Enable>
-      <MaxDistance>.25</MaxDistance>
-      <Width>.001</Width>
+      <Enable>true</Enable>
+      <MaxDistance>0.270000011</MaxDistance>
+      <Width>0.00200000009</Width>
     </Line>
     <MouseGravity>
-      <Enable>1</Enable>
+      <Enable>true</Enable>
       <Strength>10</Strength>
     </MouseGravity>
+    <AudioResponse>
+      <Enable>true</Enable>
+      <BassBaseAmplifier>10</BassBaseAmplifier>
+      <BassPeakAmplifier>1.70000005</BassPeakAmplifier>
+      <HighBaseAmplifier>1</HighBaseAmplifier>
+      <HighPeakAmplifier>1.79999995</HighPeakAmplifier>
+      <ColorFilter>6</ColorFilter>
+    </AudioResponse>
   </ParticleEffect>
 </Wallpaper>

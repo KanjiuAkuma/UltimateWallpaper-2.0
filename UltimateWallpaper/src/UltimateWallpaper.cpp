@@ -10,12 +10,14 @@
 
 #include "util/audioAnalyzer/SmoothSpectrumPreProcessor.h"
 
-UltimateWallpaper::UltimateWallpaper(boost::property_tree::ptree& configuration) {
+UltimateWallpaper::UltimateWallpaper(boost::property_tree::ptree& configuration) : Application() {
 	m_fpsCounterEnable = configuration.get<bool>("Wallpaper.FpsCounter.Enable");
 	m_fpsCounterPosX = configuration.get<float>("Wallpaper.FpsCounter.Position.X");
 	m_fpsCounterPosY = configuration.get<float>("Wallpaper.FpsCounter.Position.Y");
 
-	m_audioPreProcessor = new SmoothSpectrumPreProcessor(100.f, .10f);
+	m_audioPreProcessor = new SmoothSpectrumPreProcessor(
+		configuration.get<float>("Wallpaper.AudioResponse.SmoothingFactor"), 
+		configuration.get<float>("Wallpaper.AudioResponse.Threshold"));
 	if (configuration.get<bool>("Wallpaper.Slideshow.Enable")) {
 		m_slideShow = new SlideShow(m_audioPreProcessor->getSpectrum());
 		m_slideShow->loadSettings(configuration.get_child("Wallpaper.Slideshow"));
@@ -23,7 +25,7 @@ UltimateWallpaper::UltimateWallpaper(boost::property_tree::ptree& configuration)
 	}
 
 	if (configuration.get<bool>("Wallpaper.ParticleEffect.Enable")) {
-		m_particleEffect = new ParticleEffect();
+		m_particleEffect = new ParticleEffect(m_audioPreProcessor->getSpectrum());
 		m_particleEffect->loadSettings(configuration.get_child("Wallpaper.ParticleEffect"));
 	}
 

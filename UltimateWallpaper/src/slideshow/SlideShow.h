@@ -39,6 +39,7 @@ public:
 	void setHighPeakAmplifier(float peakAmplifier);
 	void setBassBaseAmplifier(float baseAmplifier);
 	void setHighBaseAmplifier(float baseAmplifier);
+	void setBrightnessFilter(float brightnessFilter) const;
 #endif
 
 

@@ -11,6 +11,8 @@ public:
 	~Editor();
 
 	void render() override;
+	void renderSlideShowSettings(float speedMod);
+	void renderParticleEffectSettings(float speedMod);
 
 	void loadSettings(const std::string& name);
 	void saveSettings(const std::string& name) const;

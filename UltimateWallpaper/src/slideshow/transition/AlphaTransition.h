@@ -9,7 +9,7 @@ class AlphaTransition : public Transition {
 	Renderer::Shader* m_shader;
 
 public:
-	explicit AlphaTransition(float duration);
+	explicit AlphaTransition(float duration, float brightnessFilter);
 	~AlphaTransition() override;
 
 	void setTex0Slot(unsigned int tex0Slot) override;
@@ -17,6 +17,7 @@ public:
 
 	// settings
 	void setDuration(float duration) override;
+	void setBrightnessFilter(float brightnessFilter) override;
 
 	void render(glm::mat4 mvp, float bassAmplitude, float highAmplitude) const override;
 };

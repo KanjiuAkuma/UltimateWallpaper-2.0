@@ -5,7 +5,7 @@
 
 #include "util/Random.h"
 
-ParticleEffect::ParticleEffect() {	
+ParticleEffect::ParticleEffect(Spectrum* spectrum) : m_audioSpectrum(spectrum) {	
 	using namespace Renderer;
 
 	m_coreShader = Shader::fromFiles(
@@ -112,12 +112,23 @@ void ParticleEffect::render(const glm::mat4 mvp, const glm::vec2& mousePos) cons
 	}
 
 	/* draw core */
+	// sub bass + bass: 60 -> 250 Hz
+	float bassAmplitude = 0;
+	float highAmplitude = 0;
+	if (m_audioResponseEnable) {
+		bassAmplitude = m_audioSpectrum->sumRange(LOW_END, BASS, 5.f);
+		bassAmplitude = log(1.f + bassAmplitude * m_bassBaseAmplifier) * m_bassPeakAmplifier;
+
+		highAmplitude = m_audioSpectrum->sumRange(MID_RANGE, PRESENCE, 1.1f);
+		highAmplitude = log(1.f + highAmplitude * m_highBaseAmplifier) * m_highPeakAmplifier;
+	}
+
 	m_coreShader->bind();
+	m_coreShader->setUniform2f("u_audioAmplitude", bassAmplitude, highAmplitude);
+	m_coreShader->setUniformMat4("u_mvp", mvp);
 
 	ParticleModel* m = m_particleModel;
 	m->coreMesh->bind();
-	
-	m_coreShader->setUniformMat4("u_mvp", mvp);
 	
 	GL_CALL(glDrawElementsInstanced(GL_TRIANGLES, m->coreMesh->getVertexCount(), GL_UNSIGNED_INT, nullptr, m_particleCount));
 }
@@ -139,6 +150,15 @@ void ParticleEffect::loadSettings(boost::property_tree::ptree& configuration) {
 	m_lineShader->bind();
 	m_lineShader->setUniform1f("u_lineWidth", configuration.get<float>("Line.Width"));
 	m_lineShader->setUniform1f("u_maxLineDistance", configuration.get<float>("Line.MaxDistance"));
+
+	m_audioResponseEnable = configuration.get<bool>("AudioResponse.Enable");
+	m_bassBaseAmplifier = configuration.get<float>("AudioResponse.BassBaseAmplifier");
+	m_bassPeakAmplifier = configuration.get<float>("AudioResponse.BassPeakAmplifier");
+	m_highBaseAmplifier = configuration.get<float>("AudioResponse.HighBaseAmplifier");
+	m_highPeakAmplifier = configuration.get<float>("AudioResponse.HighPeakAmplifier");
+
+	m_coreShader->bind();
+	m_coreShader->setUniform1f("u_colorFilter", configuration.get<float>("AudioResponse.ColorFilter"));
 }
 void ParticleEffect::setParticleCount(const int particleCount) {
 	using namespace Renderer;
@@ -491,6 +511,31 @@ void ParticleEffect::setMouseGravityEnable(const bool mouseGravityEnable) {
 void ParticleEffect::setMouseGravityStrength(const float mouseGravityStrength) {
 	m_mouseGravityStrength = mouseGravityStrength;
 	m_cfg.put("MouseGravity.Strength", mouseGravityStrength);
+}
+
+void ParticleEffect::setAudioResponseEnable(const bool audioResponseEnable) {
+	m_audioResponseEnable = audioResponseEnable;
+}
+
+void ParticleEffect::setBassPeakAmplifier(const float peakAmplifier) {
+	m_bassPeakAmplifier = peakAmplifier;
+}
+
+void ParticleEffect::setHighPeakAmplifier(const float peakAmplifier) {
+	m_highPeakAmplifier = peakAmplifier;
+}
+
+void ParticleEffect::setBassBaseAmplifier(const float baseAmplifier) {
+	m_bassBaseAmplifier = baseAmplifier;
+}
+
+void ParticleEffect::setHighBaseAmplifier(const float baseAmplifier) {
+	m_highBaseAmplifier = baseAmplifier;
+}
+
+void ParticleEffect::setColorFilter(const float colorFilter) const {
+	m_coreShader->bind();
+	m_coreShader->setUniform1f("u_colorFilter", colorFilter);
 }
 #endif
 

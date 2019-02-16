@@ -19,6 +19,7 @@ public:
 
 	// settings
 	virtual void setDuration(float duration) = 0;
+	virtual void setBrightnessFilter(float brightnessFilter) = 0;
 	std::string getType() const;
 
 	virtual void update(float dt);

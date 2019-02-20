@@ -6,9 +6,6 @@ Wallpaper for Wallpaper Engine
 - OpenGL Version 330 or higher
 - Wallpaper Engine (https://store.steampowered.com/app/431960/Wallpaper_Engine/)
 
-# Download link
-https://drive.google.com/open?id=1fFe292uCHBYtst3FDsG0MhcC7aTqUs0v
-
 # Versions
 <p> There are 3 executables included in the dowload </p>
 
@@ -47,8 +44,8 @@ Or you use the 'default-cfg'. </p>
 
 
 # Links
-- tinyxml2 (xml parsing): https://github.com/leethomason/tinyxml2
-- stb (image loading): https://github.com/nothings/stb
-- spdlog (logging): https://github.com/gabime/spdlog
-- bass (audio visualisation): http://www.un4seen.com/
+- tinyxml2 (Xml parsing): https://github.com/leethomason/tinyxml2
+- stb (Image loading): https://github.com/nothings/stb
+- spdlog (Logging): https://github.com/gabime/spdlog
+- bass (Audio stream capturing): http://www.un4seen.com/
 - imgui (Editor Ui): https://github.com/ocornut/imgui

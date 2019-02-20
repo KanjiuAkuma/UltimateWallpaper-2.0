@@ -5,6 +5,7 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include "slideshow/SlideShow.h"
+#include "equalizer/Equalizer.h"
 #include "particleEffect/ParticleEffect.h"
 #include "util/audioAnalyzer/SmoothSpectrumPreProcessor.h"
 
@@ -28,5 +29,6 @@ protected:
 	AudioStreamReader* m_audioStreamReader = AudioStreamReader::getInstance();
 	SmoothSpectrumPreProcessor* m_audioPreProcessor;
 	SlideShow* m_slideShow = nullptr;
+	std::vector<Equalizer*> m_equalizers;
 	ParticleEffect* m_particleEffect = nullptr;
 };

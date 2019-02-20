@@ -18,7 +18,7 @@
  *		Audio base amplifier
  */
 
-class SlideShow : public Configurable {
+class SlideShow final : public Configurable {
 public:
 	SlideShow(Spectrum* spectrum);
 	~SlideShow();

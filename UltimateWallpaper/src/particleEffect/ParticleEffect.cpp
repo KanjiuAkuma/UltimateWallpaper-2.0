@@ -6,7 +6,7 @@
 #include "util/Random.h"
 
 ParticleEffect::ParticleEffect(Spectrum* spectrum) : m_audioSpectrum(spectrum) {	
-	using namespace Renderer;
+	using namespace JApp::Renderer;
 
 	m_coreShader = Shader::fromFiles(
 		"resources/shaders/particle/particleVertex.shader",
@@ -136,7 +136,7 @@ void ParticleEffect::render(const glm::mat4 mvp, const glm::vec2& mousePos) cons
 void ParticleEffect::loadSettings(boost::property_tree::ptree& configuration) {
 	m_cfg = configuration;
 
-	using namespace Renderer;
+	using namespace JApp::Renderer;
 	setParticleCount(configuration.get<int>("ParticleCount"));
 
 	m_lineEnable = configuration.get<bool>("Line.Enable");
@@ -160,8 +160,9 @@ void ParticleEffect::loadSettings(boost::property_tree::ptree& configuration) {
 	m_coreShader->bind();
 	m_coreShader->setUniform1f("u_colorFilter", configuration.get<float>("AudioResponse.ColorFilter"));
 }
+
 void ParticleEffect::setParticleCount(const int particleCount) {
-	using namespace Renderer;
+	using namespace JApp::Renderer;
 
 	// particle settings
 	const auto sizeMin = m_cfg.get<float>("Particle.Size.Min");

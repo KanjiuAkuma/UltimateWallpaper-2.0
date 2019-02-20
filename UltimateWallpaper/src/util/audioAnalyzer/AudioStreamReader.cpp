@@ -1,8 +1,5 @@
 ﻿#include "AudioStreamReader.h"
 
-#include <stdexcept>
-#include <sstream>
-
 #include <bass.h>
 #include <basswasapi.h>
 

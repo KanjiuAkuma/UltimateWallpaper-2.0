@@ -2,9 +2,8 @@
 
 #include "renderer/Renderer.h"
 
-
 ParticleModel::ParticleModel() {
-	using namespace Renderer;
+	using namespace JApp::Renderer;
 
 	const float sq3 = glm::sqrt(3.f);
 

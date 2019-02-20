@@ -9,7 +9,7 @@
 #include "util/audioAnalyzer/Spectrum.h"
 #include "editor/Configurable.h"
 
-class ParticleEffect : public Configurable {
+class ParticleEffect final : public Configurable {
 	
 	boost::property_tree::ptree m_cfg;
 
@@ -20,12 +20,12 @@ class ParticleEffect : public Configurable {
 	float m_mouseGravityStrength = 0;
 
 	ParticleModel* m_particleModel = new ParticleModel();
-	Renderer::TextureBuffer *m_particlesPositionsBuffer = nullptr, 
+	JApp::Renderer::TextureBuffer *m_particlesPositionsBuffer = nullptr,
 							*m_particlesVariablesBuffer = nullptr, 
 							*m_particlesColorsBuffer = nullptr;
-	Renderer::Shader *m_coreShader;
-	Renderer::Shader* m_lineShader;
-	Renderer::VertexArray* m_lineVertexArray = new Renderer::VertexArray();
+	JApp::Renderer::Shader *m_coreShader;
+	JApp::Renderer::Shader* m_lineShader;
+	JApp::Renderer::VertexArray* m_lineVertexArray = new JApp::Renderer::VertexArray();
 
 	bool m_audioResponseEnable = false;
 	Spectrum* m_audioSpectrum;

@@ -9,6 +9,7 @@
 #include <imgui_impl_opengl3.h>
 
 #include <boost/property_tree/xml_parser.hpp>
+#include <boost/format.hpp>
 
 Editor::Editor(boost::property_tree::ptree& configuration) : UltimateWallpaper(configuration), m_cfg(configuration) {
 	m_fpsCounterEnableOverride = m_fpsCounterEnable;
@@ -170,6 +171,10 @@ void Editor::render() {
 		renderSlideShowSettings(speedMod);
 	}
 
+	if (ImGui::CollapsingHeader("Equalizer")) {
+		renderEqualizerSettings(speedMod);
+	}
+
 	if (ImGui::CollapsingHeader("Particle Effect")) {
 		renderParticleEffectSettings(speedMod);
 	}
@@ -206,10 +211,10 @@ void Editor::render() {
 }
 
 void Editor::renderSlideShowSettings(const float speedMod) {
-	bool slideShowEnable = m_cfg.get<bool>("Wallpaper.Slideshow.Enable");
-	if (ImGui::Checkbox("Slideshow enable", &slideShowEnable)) {
-		APP_INFO("Slide show enable {}", slideShowEnable);
-		if (slideShowEnable) {
+	bool enable = m_cfg.get<bool>("Wallpaper.Slideshow.Enable");
+	if (ImGui::Checkbox("Slideshow enable", &enable)) {
+		if (enable) {
+			delete m_slideShow;
 			m_slideShow = new SlideShow(m_audioPreProcessor->getSpectrum());
 			m_slideShow->loadSettings(m_cfg.get_child("Wallpaper.Slideshow"));
 		}
@@ -217,10 +222,10 @@ void Editor::renderSlideShowSettings(const float speedMod) {
 			delete m_slideShow;
 			m_slideShow = nullptr;
 		}
-		m_cfg.put("Wallpaper.Slideshow.Enable", slideShowEnable);
+		m_cfg.put("Wallpaper.Slideshow.Enable", enable);
 	}
 
-	if (slideShowEnable) {
+	if (enable) {
 		static char imgDir[1024];
 		static bool firstTime = true, dirValid = true, colorChanged = false;
 		if (firstTime) {
@@ -329,11 +334,295 @@ void Editor::renderSlideShowSettings(const float speedMod) {
 	}
 }
 
+void Editor::renderEqualizerSettings(const float speedMod) {
+	static int count = m_cfg.get<int>("Wallpaper.Equalizer.Count");
+	static int currentEq = 0;
+	static boost::format cfgFmt("Wallpaper.Equalizer.Eq_%d");
+
+	if (ImGui::Button("Add equalizer")) {
+		const std::string id = (cfgFmt % count).str();
+		currentEq = count;
+		count++;
+		m_cfg.put("Wallpaper.Equalizer.Count", count);
+		m_cfg.put(id + ".Name", "New Equalizer");
+		m_cfg.put(id + ".Type", "Line");
+		m_cfg.put(id + ".SubType", "Bar");
+		m_cfg.put(id + ".BarCount", 16);
+		m_cfg.put(id + ".BarWidth", .9);
+		m_cfg.put(id + ".BaseAmplitude", 0);
+		m_cfg.put(id + ".BaseAmplifier", 5);
+		m_cfg.put(id + ".PeakAmplifier", 1);
+		m_cfg.put(id + ".Color.Alpha", .7);
+		m_cfg.put(id + ".Color.Offset", 0);
+		m_cfg.put(id + ".Color.Flow.Enable", true);
+		m_cfg.put(id + ".Color.Flow.Speed", .001);
+		m_cfg.put(id + ".Position.X", 0);
+		m_cfg.put(id + ".Position.Y", 0);
+		m_cfg.put(id + ".Position.Angle", 0);
+		m_cfg.put(id + ".Flip", false);
+		m_cfg.put(id + ".Size", .5);
+		m_cfg.put(id + ".Ring.Radius.Inner", 1);
+		m_cfg.put(id + ".Ring.Radius.Outer", 2);
+		m_cfg.put(id + ".Ring.Rounding.Inner", true);
+		m_cfg.put(id + ".Ring.Rounding.Outer", true);
+		m_cfg.put(id + ".Ring.Rotation.Enable", true);
+		m_cfg.put(id + ".Ring.Rotation.Speed", .01);
+
+		auto* eq = new Equalizer(m_audioPreProcessor->getSpectrum());
+		eq->loadSettings(m_cfg.get_child(id));
+		m_equalizers.push_back(eq);
+	}
+
+	if (0 < count) {
+
+		if (ImGui::BeginCombo("Current equalizer", m_cfg.get<std::string>((cfgFmt % currentEq).str() + ".Name").c_str())) {
+			for (int i = 0; i < count; i++) {
+				if (ImGui::Selectable(m_cfg.get<std::string>((cfgFmt % i).str() + ".Name").c_str())) {
+					currentEq = i;
+				}
+				if (i == currentEq) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+
+		std::string id = (cfgFmt % currentEq).str();
+
+		if (ImGui::Button("Copy")) {
+			const std::string idOld = id;
+			id = (cfgFmt % count).str();
+			currentEq = count;
+			count++;
+			
+			m_cfg.put("Wallpaper.Equalizer.Count", count);
+
+			const boost::property_tree::ptree node = m_cfg.get_child(idOld);
+			m_cfg.put_child(id, node);
+			m_cfg.put(id + ".Name", "Copy of " + m_cfg.get<std::string>(idOld + ".Name"));
+			
+			auto* eq = new Equalizer(m_audioPreProcessor->getSpectrum());
+			eq->loadSettings(m_cfg.get_child(id));
+			m_equalizers.push_back(eq);
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Remove")) {
+			m_cfg.erase(id);
+			count--;
+
+			for (int i = currentEq; i < count; i++) {
+				const std::string idOld = (cfgFmt % (i + 1)).str();
+				const std::string idNew = (cfgFmt % i).str();
+
+				const boost::property_tree::ptree node = m_cfg.get_child(idOld);
+				m_cfg.put_child(idNew, node);
+			}
+			
+			delete m_equalizers[currentEq];
+			m_equalizers.erase(m_equalizers.begin() + currentEq);
+			if (0 < currentEq) {
+				currentEq--;
+			}
+		}
+
+		char name[128];
+		auto sname = m_cfg.get<std::string>(id + ".Name");
+		for (int i = 0; i < 128; i++) {
+			if (i < sname.size()) {
+				name[i] = sname[i];
+			}
+			else {
+				name[i] = '\0';
+			}
+		}
+
+		if (ImGui::InputText("Name", name, IM_ARRAYSIZE(name), ImGuiInputTextFlags_EnterReturnsTrue)) {
+			m_cfg.put(id + ".Name", name);
+		}
+
+		auto currentType = m_cfg.get<std::string>(id + ".Type") == "Line" ? 0 : 1;
+		auto currentSubType = m_cfg.get<std::string>(id + ".SubType") == "Bar" ? 0 : 1;
+		static char* types[]{ "Line", "Ring" };
+		static char* subTypes[]{ "Bar", "Segment" };
+
+		if (ImGui::Combo("Type", &currentType, types, 2)) {
+			m_cfg.put(id + ".Type", currentType == 0 ? "Line" : "Ring");
+			m_equalizers[currentEq]->loadSettings(m_cfg.get_child(id));
+		}
+
+		if (currentType == 1) {
+			if (ImGui::Combo("Sub type", &currentSubType, subTypes, 2)) {
+				m_cfg.put(id + ".SubType", currentSubType == 0 ? "Bar" : "Segment");
+				m_equalizers[currentEq]->loadSettings(m_cfg.get_child(id));
+			}
+		}
+
+		auto barCount = m_cfg.get<int>(id + ".BarCount");
+		if (ImGui::DragInt("Bar count", &barCount, speedMod == 1 ? 1.f : 10.f, 2, 4096)) {
+			m_equalizers[currentEq]->setBarCount(barCount);
+			m_cfg.put(id + ".BarCount", barCount);
+		}
+
+		auto barWidth = m_cfg.get<float>(id + ".BarWidth");
+		if (currentType == 0 || currentSubType == 0) {
+			if (ImGui::DragFloat("Bar width", &barWidth, .05f * speedMod, .05f, 1.f)) {
+				m_equalizers[currentEq]->setBarWidth(barWidth);
+				m_cfg.put(id + ".BarWidth", barWidth);
+			}
+		}
+
+		auto baseAmplitude = m_cfg.get<float>(id + ".BaseAmplitude");
+		if (ImGui::DragFloat("Base amplitude", &baseAmplitude, .001f * speedMod, 0.f, 10.f)) {
+			m_equalizers[currentEq]->setBaseAmplitude(baseAmplitude);
+			m_cfg.put(id + ".BaseAmplitude", baseAmplitude);
+		}
+
+		auto baseAmplifier = m_cfg.get<float>(id + ".BaseAmplifier");
+		if (ImGui::DragFloat("Base amplifier", &baseAmplifier, .001f * speedMod, 0.f, 10.f)) {
+			m_equalizers[currentEq]->setBaseAmplifier(baseAmplifier);
+			m_cfg.put(id + ".BaseAmplifier", baseAmplifier);
+		}
+
+		auto peakAmplifier = m_cfg.get<float>(id + ".PeakAmplifier");
+		if (ImGui::DragFloat("Peak amplifier", &peakAmplifier, .001f * speedMod, 0.f, 10.f)) {
+			m_equalizers[currentEq]->setPeakAmplifier(peakAmplifier);
+			m_cfg.put(id + ".PeakAmplifier", peakAmplifier);
+		}
+
+		ImGui::Text("Color");
+
+		auto alpha = m_cfg.get<float>(id + ".Color.Alpha");
+		if (ImGui::DragFloat("Alpha", &alpha, .01f * speedMod, 0.f, 1.f)) {
+			m_equalizers[currentEq]->setAlpha(alpha);
+			m_cfg.put(id + ".Color.Alpha", alpha);
+		}
+
+		auto colorFlowEnable = m_cfg.get<bool>(id + ".Color.Flow.Enable");
+		auto colorFlowSpeed = m_cfg.get<float>(id + ".Color.Flow.Speed");
+
+		if (ImGui::Checkbox("Color flow enable", &colorFlowEnable)) {
+			if (colorFlowEnable) {
+				m_equalizers[currentEq]->setColorFlowSpeed(colorFlowSpeed);
+
+			}
+			else {
+				m_equalizers[currentEq]->disableColorFlow();
+			}
+			m_cfg.put(id + ".Color.Flow.Enable", colorFlowEnable);
+		}
+
+		if (colorFlowEnable) {
+			if (ImGui::DragFloat("Color flow speed", &colorFlowSpeed, .01f * speedMod, -1.f, 1.f)) {
+				m_equalizers[currentEq]->setColorFlowSpeed(colorFlowSpeed);
+				m_cfg.put(id + ".Color.Flow.Speed", colorFlowSpeed);
+			}
+		}
+		else {
+			auto colorOffset = m_cfg.get<float>(id + ".Color.Offset");
+			if (ImGui::DragFloat("Color (Hue)", &colorOffset, .005f * speedMod, 0.f, 1.f)) {
+				m_equalizers[currentEq]->setColorOffset(colorOffset);
+				m_cfg.put(id + ".Color.Offset", colorOffset);
+			}
+		}
+
+		ImGui::Text("Position");
+		auto x = m_cfg.get<float>(id + ".Position.X");
+		if (ImGui::DragFloat("X", &x, .01f * speedMod, -100.f, 100.f)) {
+			m_equalizers[currentEq]->setPositionX(x);
+			m_cfg.put(id + ".Position.X", x);
+		}
+
+		auto y = m_cfg.get<float>(id + ".Position.Y");
+		if (ImGui::DragFloat("Y", &y, .01f * speedMod, -100.f, 100.f)) {
+			m_equalizers[currentEq]->setPositionY(y);
+			m_cfg.put(id + ".Position.Y", y);
+		}
+
+		auto angle = m_cfg.get<float>(id + ".Position.Angle");
+		if (ImGui::DragFloat("Angle", &angle, 10.f * speedMod, -360.f, 360.f)) {
+			m_equalizers[currentEq]->setAngle(angle);
+			m_cfg.put(id + ".Position.Angle", angle);
+		}
+
+		auto size = m_cfg.get<float>(id + ".Size");
+		if (ImGui::DragFloat("Size", &size, .1f * speedMod, 0.01f, 10.f)) {
+			m_equalizers[currentEq]->setWidth(size);
+			if (currentType == 1) {
+				m_equalizers[currentEq]->setHeight(size);
+			}
+			m_cfg.put(id + ".Size", size);
+		}
+
+		auto flip = m_cfg.get<bool>(id + ".Flip");
+		if (ImGui::Checkbox("Flip", &flip)) {
+			m_equalizers[currentEq]->setFlip(flip);
+			m_cfg.put(id + ".Flip", flip);
+		}
+
+		// ring only
+		if (currentType == 1) {
+			ImGui::Text("Radius");
+			auto innerRadius = m_cfg.get<float>(id + ".Ring.Radius.Inner");
+			auto outerRadius = m_cfg.get<float>(id + ".Ring.Radius.Outer");
+			if (ImGui::DragFloat("Inner", &innerRadius, 0.01f * speedMod, 0.f, 100.f)) {
+				if (outerRadius < innerRadius) {
+					m_equalizers[currentEq]->setOuterRadius(innerRadius);
+					m_cfg.put(id + ".Ring.Radius.Outer", innerRadius);
+				}
+				m_equalizers[currentEq]->setInnerRadius(innerRadius);
+				m_cfg.put(id + ".Ring.Radius.Inner", innerRadius);
+			}
+
+			if (ImGui::DragFloat("Outer", &outerRadius, 0.01f * speedMod, 0.f, 100.f)) {
+				if (outerRadius < innerRadius) {
+					m_equalizers[currentEq]->setInnerRadius(outerRadius);
+					m_cfg.put(id + ".Ring.Radius.Inner", outerRadius);
+				}
+				m_equalizers[currentEq]->setOuterRadius(outerRadius);
+				m_cfg.put(id + ".Ring.Radius.Outer", outerRadius);
+			}
+
+			auto innerRounding = m_cfg.get<bool>(id + ".Ring.Rounding.Inner");
+			if (ImGui::Checkbox("Inner rounding", &innerRounding)) {
+				m_equalizers[currentEq]->setInnerRounding(innerRounding);
+				m_cfg.put(id + ".Ring.Rounding.Inner", innerRounding);
+			}
+
+			auto outerRounding = m_cfg.get<bool>(id + ".Ring.Rounding.Outer");
+			if (ImGui::Checkbox("Outer rounding", &outerRounding)) {
+				m_equalizers[currentEq]->setOuterRounding(outerRounding);
+				m_cfg.put(id + ".Ring.Rounding.Outer", outerRounding);
+			}
+
+			auto rotationEnable = m_cfg.get<bool>(id + ".Ring.Rotation.Enable");
+			auto rotationSpeed = m_cfg.get<float>(id + ".Ring.Rotation.Speed");
+			if (ImGui::Checkbox("Rotation", &rotationEnable)) {
+				if (rotationEnable) {
+					m_equalizers[currentEq]->setRotationSpeed(rotationSpeed);
+				}
+				else {
+					m_equalizers[currentEq]->disableRotation();
+				}
+				m_cfg.put(id + ".Ring.Rotation.Enable", rotationEnable);
+			}
+
+			if (rotationEnable) {
+				if (ImGui::DragFloat("Rotation speed", &rotationSpeed, .01f * speedMod, -1.f, 1.f)) {
+					m_equalizers[currentEq]->setRotationSpeed(rotationSpeed);
+					m_cfg.put(id + ".Ring.Rotation.Speed", rotationSpeed);
+				}
+			}
+		}
+	}
+}
+
 void Editor::renderParticleEffectSettings(const float speedMod) {
-	bool particleEffectEnable = m_cfg.get<bool>("Wallpaper.ParticleEffect.Enable");
-	if (ImGui::Checkbox("Particle effect enable", &particleEffectEnable)) {
-		APP_INFO("Particle effect enable {}", particleEffectEnable);
-		if (particleEffectEnable) {
+	bool enable = m_cfg.get<bool>("Wallpaper.ParticleEffect.Enable");
+	if (ImGui::Checkbox("Particle effect enable", &enable)) {
+		if (enable) {
+			delete m_particleEffect;
 			m_particleEffect = new ParticleEffect(m_audioPreProcessor->getSpectrum());
 			m_particleEffect->loadSettings(m_cfg.get_child("Wallpaper.ParticleEffect"));
 		}
@@ -341,10 +630,10 @@ void Editor::renderParticleEffectSettings(const float speedMod) {
 			delete m_particleEffect;
 			m_particleEffect = nullptr;
 		}
-		m_cfg.put("Wallpaper.ParticleEffect.Enable", particleEffectEnable);
+		m_cfg.put("Wallpaper.ParticleEffect.Enable", enable);
 	}
 
-	if (particleEffectEnable) {
+	if (enable) {
 		int particleCount = m_cfg.get<int>("Wallpaper.ParticleEffect.ParticleCount");
 		if (ImGui::DragInt("Particle count", &particleCount, 1, 1, 500)) {
 			m_particleEffect->setParticleCount(particleCount);

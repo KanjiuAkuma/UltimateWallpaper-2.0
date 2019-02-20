@@ -2,13 +2,13 @@
 <Wallpaper>
   <AudioResponse>
     <SmoothingFactor>100</SmoothingFactor>
-    <Threshold>0.200000003</Threshold>
+    <Threshold>0.2</Threshold>
   </AudioResponse>
   <FpsCounter>
     <Enable>false</Enable>
     <Position>
       <X>0</X>
-      <Y>1031</Y>
+      <Y>0</Y>
     </Position>
   </FpsCounter>
   <Slideshow>
@@ -20,17 +20,20 @@
       <Duration>7.5</Duration>
     </Transition>
     <AudioResponse>
-      <Enable>false</Enable>
+      <Enable>true</Enable>
       <BassBaseAmplifier>10</BassBaseAmplifier>
-      <BassPeakAmplifier>0.0700000003</BassPeakAmplifier>
+      <BassPeakAmplifier>0.068</BassPeakAmplifier>
       <HighBaseAmplifier>1</HighBaseAmplifier>
-      <HighPeakAmplifier>0.5</HighPeakAmplifier>
-      <BrightnessFilter>4</BrightnessFilter>
+      <HighPeakAmplifier>0.42</HighPeakAmplifier>
+      <BrightnessFilter>5</BrightnessFilter>
     </AudioResponse>
   </Slideshow>
+  <Equalizer>
+    <Count>0</Count>
+  </Equalizer>
   <ParticleEffect>
     <Enable>false</Enable>
-    <ParticleCount>75</ParticleCount>
+    <ParticleCount>100</ParticleCount>
     <Particle>
       <Size>
         <Fixed>0</Fixed>
@@ -40,21 +43,21 @@
       <Velocity>
         <Locked>true</Locked>
         <X>
-          <Min>-0.349999994</Min>
-          <Max>0.349999994</Max>
+          <Min>-0.45</Min>
+          <Max>0.45</Max>
         </X>
         <Y>
-          <Min>-0.349999994</Min>
-          <Max>0.349999994</Max>
+          <Min>-0.45</Min>
+          <Max>0.45</Max>
         </Y>
         <Angle>
           <Locked>true</Locked>
-          <Min>-140</Min>
-          <Max>140</Max>
+          <Min>-166</Min>
+          <Max>166</Max>
         </Angle>
       </Velocity>
       <Glow>
-        <Enable>1</Enable>
+        <Enable>true</Enable>
         <Size>
           <Min>1</Min>
           <Max>2</Max>
@@ -66,8 +69,8 @@
       </Glow>
     </Particle>
     <Line>
-      <Enable>false</Enable>
-      <MaxDistance>0.270000011</MaxDistance>
+      <Enable>true</Enable>
+      <MaxDistance>0.300000012</MaxDistance>
       <Width>0.00200000009</Width>
     </Line>
     <MouseGravity>
@@ -77,9 +80,9 @@
     <AudioResponse>
       <Enable>false</Enable>
       <BassBaseAmplifier>10</BassBaseAmplifier>
-      <BassPeakAmplifier>1.70000005</BassPeakAmplifier>
+      <BassPeakAmplifier>0.7</BassPeakAmplifier>
       <HighBaseAmplifier>1</HighBaseAmplifier>
-      <HighPeakAmplifier>1.79999995</HighPeakAmplifier>
+      <HighPeakAmplifier>0</HighPeakAmplifier>
       <ColorFilter>6</ColorFilter>
     </AudioResponse>
   </ParticleEffect>

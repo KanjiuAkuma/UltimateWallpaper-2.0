@@ -22,15 +22,57 @@
     <AudioResponse>
       <Enable>true</Enable>
       <BassBaseAmplifier>10</BassBaseAmplifier>
-      <BassPeakAmplifier>0.0700000003</BassPeakAmplifier>
+      <BassPeakAmplifier>0.0680000037</BassPeakAmplifier>
       <HighBaseAmplifier>1</HighBaseAmplifier>
-      <HighPeakAmplifier>0.5</HighPeakAmplifier>
-      <BrightnessFilter>4</BrightnessFilter>
+      <HighPeakAmplifier>0.419999987</HighPeakAmplifier>
+      <BrightnessFilter>5</BrightnessFilter>
     </AudioResponse>
   </Slideshow>
+  <Equalizer>
+    <Count>1</Count>
+    <Eq_0>
+      <Name>RingEq1</Name>
+      <Type>Ring</Type>
+      <SubType>Segment</SubType>
+      <BarCount>52</BarCount>
+      <BarWidth>.9</BarWidth>
+      <BaseAmplitude>0.0419999994</BaseAmplitude>
+      <BaseAmplifier>5</BaseAmplifier>
+      <PeakAmplifier>.3</PeakAmplifier>
+      <Color>
+        <Alpha>.7</Alpha>
+        <Offset>0</Offset>
+        <Flow>
+          <Enable>true</Enable>
+          <Speed>.001</Speed>
+        </Flow>
+      </Color>
+      <Position>
+        <X>0.769999981</X>
+        <Y>0</Y>
+        <Angle>0</Angle>
+      </Position>
+      <Flip>false</Flip>
+      <Size>1.79999995</Size>
+      <Ring>
+        <Radius>
+          <Inner>0.200000003</Inner>
+          <Outer>0.540000021</Outer>
+        </Radius>
+        <Rounding>
+          <Inner>true</Inner>
+          <Outer>true</Outer>
+        </Rounding>
+        <Rotation>
+          <Enable>true</Enable>
+          <Speed>.01</Speed>
+        </Rotation>
+      </Ring>
+    </Eq_0>
+  </Equalizer>
   <ParticleEffect>
     <Enable>true</Enable>
-    <ParticleCount>75</ParticleCount>
+    <ParticleCount>87</ParticleCount>
     <Particle>
       <Size>
         <Fixed>0</Fixed>
@@ -40,17 +82,17 @@
       <Velocity>
         <Locked>true</Locked>
         <X>
-          <Min>-0.349999994</Min>
-          <Max>0.349999994</Max>
+          <Min>-0.449999988</Min>
+          <Max>0.449999988</Max>
         </X>
         <Y>
-          <Min>-0.349999994</Min>
-          <Max>0.349999994</Max>
+          <Min>-0.449999988</Min>
+          <Max>0.449999988</Max>
         </Y>
         <Angle>
           <Locked>true</Locked>
-          <Min>-140</Min>
-          <Max>140</Max>
+          <Min>-166</Min>
+          <Max>166</Max>
         </Angle>
       </Velocity>
       <Glow>
@@ -67,7 +109,7 @@
     </Particle>
     <Line>
       <Enable>true</Enable>
-      <MaxDistance>0.270000011</MaxDistance>
+      <MaxDistance>0.300000012</MaxDistance>
       <Width>0.00200000009</Width>
     </Line>
     <MouseGravity>
@@ -77,9 +119,9 @@
     <AudioResponse>
       <Enable>true</Enable>
       <BassBaseAmplifier>10</BassBaseAmplifier>
-      <BassPeakAmplifier>1.70000005</BassPeakAmplifier>
+      <BassPeakAmplifier>0.699999988</BassPeakAmplifier>
       <HighBaseAmplifier>1</HighBaseAmplifier>
-      <HighPeakAmplifier>1.79999995</HighPeakAmplifier>
+      <HighPeakAmplifier>0</HighPeakAmplifier>
       <ColorFilter>6</ColorFilter>
     </AudioResponse>
   </ParticleEffect>

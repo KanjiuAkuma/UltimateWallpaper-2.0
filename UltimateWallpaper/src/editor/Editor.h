@@ -12,6 +12,7 @@ public:
 
 	void render() override;
 	void renderSlideShowSettings(float speedMod);
+	void renderEqualizerSettings(float speedMod);
 	void renderParticleEffectSettings(float speedMod);
 
 	void loadSettings(const std::string& name);

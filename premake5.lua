@@ -5,7 +5,7 @@ bin_int_dir = build_dir .. "bin-int\\%{prj.name}\\%{cfg.buildcfg}-%{cfg.system}-
 j_app_path = "D:\\Dev\\CPP\\JApp"
 j_app = require(j_app_path .. "\\util\\j_app")
 
-workspace "UltimateWallpaper-2_0"
+workspace "UltimateWallpaper"
 	architecture "x64"
 	characterset ("MBCS")
 	startproject "UltimateWallpaper"
@@ -101,4 +101,4 @@ project "UltimateWallpaper"
         "{COPY} %{wks.location}dependencies\\BASS\\dll %{wks.location}" .. bin_dir
 	}
 
-j_app.configureProject(j_app_path, "UltimateWallpaper-2_0", "UltimateWallpaper")
+j_app.configureProject(j_app_path, "UltimateWallpaper", "UltimateWallpaper")

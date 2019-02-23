@@ -40,7 +40,7 @@ vec3 hsv2rgb(vec3 c)
 }
 
 void main() {
-	float angle = dTheta + theta * gl_InstanceID;
+	float angle = u_angleValue + dTheta + theta * gl_InstanceID;
 	float barPosX = (-.5f + in_position.x) * barWidth * u_barWidth;
 	float amplitude = texelFetch(u_spectrum, gl_InstanceID).x;
 	float amp = u_baseAmplitude + amplitude;

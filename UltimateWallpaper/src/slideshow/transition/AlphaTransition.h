@@ -9,7 +9,7 @@ class AlphaTransition : public Transition {
 	Renderer::Shader* m_shader;
 
 public:
-	explicit AlphaTransition(float duration, float brightnessFilter);
+	explicit AlphaTransition(float duration, float brightnessFilter, float initialProgress = 0.f);
 	~AlphaTransition() override;
 
 	void setTex0Slot(unsigned int tex0Slot) override;

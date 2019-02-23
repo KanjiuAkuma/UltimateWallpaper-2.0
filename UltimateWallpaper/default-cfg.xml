@@ -1,30 +1,41 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+
 <Wallpaper>
   <AudioResponse>
     <SmoothingFactor>100</SmoothingFactor>
-    <Threshold>0.2</Threshold>
+    <Threshold>0.200000003</Threshold>
   </AudioResponse>
   <FpsCounter>
-    <Enable>false</Enable>
+    <Enable>true</Enable>
     <Position>
       <X>0</X>
       <Y>0</Y>
     </Position>
   </FpsCounter>
   <Slideshow>
-    <Enable>false</Enable>
+    <Enable>true</Enable>
     <ImageDirectory>resources/defaultImages</ImageDirectory>
     <ImageDuration>150</ImageDuration>
     <Transition>
       <Type>Alpha</Type>
       <Duration>7.5</Duration>
+      <Block>
+        <Cells>
+          <X>100</X>
+          <Y>50</Y>
+        </Cells>
+        <Diffuse>
+          <Min>0</Min>
+          <Max>1</Max>
+        </Diffuse>
+      </Block>
     </Transition>
     <AudioResponse>
-      <Enable>true</Enable>
+      <Enable>false</Enable>
       <BassBaseAmplifier>10</BassBaseAmplifier>
-      <BassPeakAmplifier>0.068</BassPeakAmplifier>
+      <BassPeakAmplifier>0.0680000037</BassPeakAmplifier>
       <HighBaseAmplifier>1</HighBaseAmplifier>
-      <HighPeakAmplifier>0.42</HighPeakAmplifier>
+      <HighPeakAmplifier>0.419999987</HighPeakAmplifier>
       <BrightnessFilter>5</BrightnessFilter>
     </AudioResponse>
   </Slideshow>
@@ -32,7 +43,7 @@
     <Count>0</Count>
   </Equalizer>
   <ParticleEffect>
-    <Enable>false</Enable>
+    <Enable>true</Enable>
     <ParticleCount>100</ParticleCount>
     <Particle>
       <Size>
@@ -43,12 +54,12 @@
       <Velocity>
         <Locked>true</Locked>
         <X>
-          <Min>-0.45</Min>
-          <Max>0.45</Max>
+          <Min>-0.449999988</Min>
+          <Max>0.449999988</Max>
         </X>
         <Y>
-          <Min>-0.45</Min>
-          <Max>0.45</Max>
+          <Min>-0.449999988</Min>
+          <Max>0.449999988</Max>
         </Y>
         <Angle>
           <Locked>true</Locked>
@@ -80,7 +91,7 @@
     <AudioResponse>
       <Enable>false</Enable>
       <BassBaseAmplifier>10</BassBaseAmplifier>
-      <BassPeakAmplifier>0.7</BassPeakAmplifier>
+      <BassPeakAmplifier>0.699999988</BassPeakAmplifier>
       <HighBaseAmplifier>1</HighBaseAmplifier>
       <HighPeakAmplifier>0</HighPeakAmplifier>
       <ColorFilter>6</ColorFilter>

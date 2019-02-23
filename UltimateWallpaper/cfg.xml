@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <Wallpaper>
   <AudioResponse>
     <SmoothingFactor>100</SmoothingFactor>
@@ -12,12 +13,20 @@
     </Position>
   </FpsCounter>
   <Slideshow>
-    <Enable>true</Enable>
-    <ImageDirectory>resources/defaultImages</ImageDirectory>
-    <ImageDuration>150</ImageDuration>
+    <Enable>true</Enable><ImageDirectory>resources/defaultImages</ImageDirectory><ImageDuration>150</ImageDuration>
     <Transition>
       <Type>Alpha</Type>
       <Duration>7.5</Duration>
+      <Block>
+        <Cells>
+          <X>100</X>
+          <Y>50</Y>
+        </Cells>
+        <Diffuse>
+          <Min>0</Min>
+          <Max>1</Max>
+        </Diffuse>
+      </Block>
     </Transition>
     <AudioResponse>
       <Enable>true</Enable>
@@ -29,16 +38,16 @@
     </AudioResponse>
   </Slideshow>
   <Equalizer>
-    <Count>1</Count>
+    <Count>2</Count>
     <Eq_0>
-      <Name>RingEq1</Name>
+      <Name>Ring</Name>
       <Type>Ring</Type>
       <SubType>Segment</SubType>
       <BarCount>52</BarCount>
       <BarWidth>.9</BarWidth>
-      <BaseAmplitude>0.0419999994</BaseAmplitude>
+      <BaseAmplitude>0.147</BaseAmplitude>
       <BaseAmplifier>5</BaseAmplifier>
-      <PeakAmplifier>.3</PeakAmplifier>
+      <PeakAmplifier>2.04999995</PeakAmplifier>
       <Color>
         <Alpha>.7</Alpha>
         <Offset>0</Offset>
@@ -53,11 +62,14 @@
         <Angle>0</Angle>
       </Position>
       <Flip>false</Flip>
-      <Size>1.79999995</Size>
+      <Size>
+        <Width>1.79999995</Width>
+        <Height>1</Height>
+      </Size>
       <Ring>
         <Radius>
           <Inner>0.200000003</Inner>
-          <Outer>0.540000021</Outer>
+          <Outer>0.349999994</Outer>
         </Radius>
         <Rounding>
           <Inner>true</Inner>
@@ -69,6 +81,48 @@
         </Rotation>
       </Ring>
     </Eq_0>
+    <Eq_1>
+      <Name>Bottom Bar</Name>
+      <Type>Line</Type>
+      <SubType>Bar</SubType>
+      <BarCount>1024</BarCount>
+      <BarWidth>1</BarWidth>
+      <BaseAmplitude>0</BaseAmplitude>
+      <BaseAmplifier>10</BaseAmplifier>
+      <PeakAmplifier>3.21000004</PeakAmplifier>
+      <Color>
+        <Alpha>0.69999999999999996</Alpha>
+        <Offset>0</Offset>
+        <Flow>
+          <Enable>true</Enable>
+          <Speed>0.001</Speed>
+        </Flow>
+      </Color>
+      <Position>
+        <X>0</X>
+        <Y>-0.99000001</Y>
+        <Angle>0</Angle>
+      </Position>
+      <Flip>false</Flip>
+      <Size>
+        <Width>3.60400009</Width>
+        <Height>0.209999993</Height>
+      </Size>
+      <Ring>
+        <Radius>
+          <Inner>1</Inner>
+          <Outer>2</Outer>
+        </Radius>
+        <Rounding>
+          <Inner>true</Inner>
+          <Outer>true</Outer>
+        </Rounding>
+        <Rotation>
+          <Enable>true</Enable>
+          <Speed>0.01</Speed>
+        </Rotation>
+      </Ring>
+    </Eq_1>
   </Equalizer>
   <ParticleEffect>
     <Enable>true</Enable>

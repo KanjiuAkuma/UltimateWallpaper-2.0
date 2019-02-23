@@ -22,6 +22,11 @@ private:
 	boost::property_tree::ptree m_cfg;
 	char* m_currentName = "cfg";
 	bool m_fpsCounterEnableOverride;
+	bool m_gridEnable = true;
+	glm::vec4 m_gridColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
+
+	Renderer::Shader* m_gridShader;
+	Renderer::Mesh* m_gridMesh;
 };
 
 #endif

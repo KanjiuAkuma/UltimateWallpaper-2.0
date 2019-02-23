@@ -74,7 +74,7 @@ void Equalizer::loadSettings(boost::property_tree::ptree& cfg) {
 			"resources/shaders/equalizer/lineEqualizerFragment.shader");
 		m_shader->bind();
 
-		m_size = glm::vec3(cfg.get<float>("Size"), m_flip ? -1.f : 1.f, 1.f);
+		m_size = glm::vec3(cfg.get<float>("Size.Width"), cfg.get<float>("Size.Height") * (m_flip ? -1.f : 1.f), 1.f);
 	}
 	else if (type == "Ring") {
 		const std::string subType = cfg.get<std::string>("SubType");
@@ -99,7 +99,7 @@ void Equalizer::loadSettings(boost::property_tree::ptree& cfg) {
 		m_shader->setUniform1f("u_innerRadius", cfg.get<float>("Ring.Radius.Inner"));
 		m_shader->setUniform1f("u_outerRadius", cfg.get<float>("Ring.Radius.Outer"));
 
-		m_size = glm::vec3(cfg.get<float>("Size"), cfg.get<float>("Size") * (m_flip ? -1.f : 1.f), 1.f);
+		m_size = glm::vec3(cfg.get<float>("Size.Width"), cfg.get<float>("Size.Width") * (m_flip ? -1.f : 1.f), 1.f);
 
 		if (cfg.get<bool>("Ring.Rotation.Enable")) {
 			m_rotationFrequency = cfg.get<float>("Ring.Rotation.Speed");

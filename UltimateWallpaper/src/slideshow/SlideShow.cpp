@@ -8,7 +8,7 @@
 
 
 #include "transition/AlphaTransition.h"
-#include "glm/gtx/integer.inl"
+#include "transition/BlockTransition.h"
 
 SlideShow::SlideShow(Spectrum* spectrum)
 {
@@ -28,7 +28,6 @@ void SlideShow::update(const float dt) {
 
 		if (m_updateInterval < m_dtAccumulated) {
 			nextImage();
-			preLoadImage(randomImage());
 		}
 	}
 }
@@ -46,6 +45,32 @@ void SlideShow::render(const glm::mat4 projection) const {
 	}
 
 	m_transition->render(projection, bassAmplitude, highAmplitude);
+}
+
+bool SlideShow::canNextImage() const {
+	return m_swapEnable;
+}
+
+void SlideShow::nextImage() {
+	if (!m_imageLoader->isFinished()) {	// wait for texture
+		APP_WARN("SlideShow: Waiting for image to finish loading!");
+		m_imageLoader->join();
+	}
+
+	m_dtAccumulated = 0;
+	m_transition->goToStart();
+
+	// load next image
+
+	delete m_currentTexture;
+	m_currentTexture = m_nextTexture;
+	m_nextTexture = Renderer::Texture::fromValues(m_imageLoader->getImage(), m_imageLoader->getImageWidth(), m_imageLoader->getImageHeight());
+
+	m_currentTexture->bind();
+	m_transition->setTex0Slot(m_currentTexture->getSlot());
+	m_nextTexture->bind();
+	m_transition->setTex1Slot(m_nextTexture->getSlot());
+	preLoadImage(randomImage());
 }
 
 void SlideShow::loadSettings(boost::property_tree::ptree& configuration) {
@@ -107,7 +132,7 @@ void SlideShow::setImageDirectory(const std::string& imageDirectory) {
 				RELEASE
 				(
 					nextImage();
-				preLoadImage(randomImage());
+					preLoadImage(randomImage());
 				)
 			}
 		}
@@ -123,9 +148,15 @@ void SlideShow::setImageDuration(const int duration) {
 	m_updateInterval = duration + m_transition->getDuration();
 }
 
+Transition* SlideShow::getTransition() const {
+	return m_transition;
+}
+
 void SlideShow::setTransition(Transition* transition) {
 	delete m_transition;
 	m_transition = transition;
+	m_transition->setTex0Slot(m_currentTexture->getSlot());
+	m_transition->setTex1Slot(m_nextTexture->getSlot());
 }
 
 void SlideShow::setTransitionDuration(const float transitionDuration) const {
@@ -156,6 +187,29 @@ void SlideShow::setBrightnessFilter(const float brightnessFilter) const {
 	m_transition->setBrightnessFilter(brightnessFilter);
 }
 
+void SlideShow::setCellsX(const int cellsX) const {
+	if (m_transition->getType() == "Block") {
+		dynamic_cast<BlockTransition*>(m_transition)->setCellsX(cellsX);
+	}
+}
+
+void SlideShow::setCellsY(const int cellsY) const {
+	if (m_transition->getType() == "Block") {
+		dynamic_cast<BlockTransition*>(m_transition)->setCellsY(cellsY);
+	}
+}
+
+void SlideShow::setDiffuseMin(const float diffuseMin) const {
+	if (m_transition->getType() == "Block") {
+		dynamic_cast<BlockTransition*>(m_transition)->setDiffuseMin(diffuseMin);
+	}
+}
+
+void SlideShow::setDiffuseMax(const float diffuseMax) const {
+	if (m_transition->getType() == "Block") {
+		dynamic_cast<BlockTransition*>(m_transition)->setDiffuseMax(diffuseMax);
+	}
+}
 #endif
 
 void SlideShow::scanDirectory(const std::string& directory) {
@@ -203,27 +257,6 @@ void SlideShow::firstImage() {
 
 	// load next image
 	m_nextTexture = JApp::Renderer::Texture::fromValues(m_imageLoader->getImage(), m_imageLoader->getImageWidth(), m_imageLoader->getImageHeight());
-	m_nextTexture->bind();
-	m_transition->setTex1Slot(m_nextTexture->getSlot());
-}
-
-void SlideShow::nextImage() {
-	if (!m_imageLoader->isFinished()) {	// wait for texture
-		APP_WARN("SlideShow: Waiting for image to finish loading!");
-		m_imageLoader->join();
-	}
-
-	m_dtAccumulated = 0;
-	m_transition->goToStart();
-
-	// load next image
-
-	delete m_currentTexture;
-	m_currentTexture = m_nextTexture;
-	m_nextTexture = JApp::Renderer::Texture::fromValues(m_imageLoader->getImage(), m_imageLoader->getImageWidth(), m_imageLoader->getImageHeight());
-
-	m_currentTexture->bind();
-	m_transition->setTex0Slot(m_currentTexture->getSlot());
 	m_nextTexture->bind();
 	m_transition->setTex1Slot(m_nextTexture->getSlot());
 }

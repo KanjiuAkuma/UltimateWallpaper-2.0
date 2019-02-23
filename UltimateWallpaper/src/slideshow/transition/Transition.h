@@ -3,14 +3,9 @@
 #include <glm/glm.hpp>
 #include <string>
 
-/*
- * Settings:
- *		Duration
- */
-
 class Transition {
 public:
-	Transition(float speed, float duration, const std::string& type);
+	Transition(float speed, float duration, const std::string& type, float initialProgress);
 	virtual ~Transition() = default;
 
 	virtual float getDuration();
@@ -21,6 +16,7 @@ public:
 	virtual void setDuration(float duration) = 0;
 	virtual void setBrightnessFilter(float brightnessFilter) = 0;
 	std::string getType() const;
+	float getProgress() const;
 
 	virtual void update(float dt);
 	virtual void render(glm::mat4 mvp, float bassAmplitude, float highAmplitude) const = 0;

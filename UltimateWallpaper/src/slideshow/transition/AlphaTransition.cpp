@@ -2,8 +2,8 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-AlphaTransition::AlphaTransition(const float duration, const float brightnessFilter)
-	: Transition(1.f / duration, duration, "Alpha")
+AlphaTransition::AlphaTransition(const float duration, const float brightnessFilter, const float initialProgress)
+	: Transition(1.f / duration, duration, "Alpha", initialProgress)
 {
 	using namespace Renderer;
 
@@ -73,5 +73,5 @@ void AlphaTransition::render(const glm::mat4 mvp, const float bassAmplitude, con
 	// m_shader->setUniformMat4("u_mvp", mvp);
 	m_shader->setUniformMat4("u_mvp", mvp * glm::scale(glm::mat4(1.f), glm::vec3(1.f + bassAmplitude, 1.f + bassAmplitude, 1.f)));
 
-	GL_CALL(glDrawElements(GL_TRIANGLES, m_mesh->ib->getCount(), GL_UNSIGNED_INT, nullptr));
+	GL_CALL(glDrawElements(GL_TRIANGLES, m_mesh->getVertexCount(), GL_UNSIGNED_INT, nullptr));
 }

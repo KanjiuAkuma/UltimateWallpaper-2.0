@@ -20,11 +20,14 @@
 
 class SlideShow final : public Configurable {
 public:
-	SlideShow(Spectrum* spectrum);
+	explicit SlideShow(Spectrum* spectrum);
 	~SlideShow();
 
 	void update(float dt);
 	void render(glm::mat4 projection) const;
+
+	bool canNextImage() const;
+	void nextImage();
 
 	// settings
 	void loadSettings(boost::property_tree::ptree& configuration) override;
@@ -32,6 +35,7 @@ public:
 
 	#if SHOW_EDITOR
 	void setImageDuration(int duration);
+	Transition* getTransition() const;
 	void setTransition(Transition* transition);
 	void setTransitionDuration(float transitionDuration) const;
 	void setAudioResponseEnable(bool audioResponseEnable);
@@ -40,8 +44,11 @@ public:
 	void setBassBaseAmplifier(float baseAmplifier);
 	void setHighBaseAmplifier(float baseAmplifier);
 	void setBrightnessFilter(float brightnessFilter) const;
-#endif
-
+	void setCellsX(int cellsX) const;
+	void setCellsY(int cellsY) const;
+	void setDiffuseMin(float diffuseMin) const;
+	void setDiffuseMax(float diffuseMax) const;
+	#endif
 
 private:
 
@@ -64,6 +71,5 @@ private:
 	void preLoadFirstImage(const std::string& path);
 	void preLoadImage(const std::string& path);
 	void firstImage();
-	void nextImage();
 	std::string randomImage();
 };

@@ -1,4 +1,6 @@
-﻿#if SHOW_EDITOR
+﻿#include "slideshow/transition/AlphaTransition.h"
+#include "slideshow/transition/BlockTransition.h"
+#if SHOW_EDITOR
 
 #include "Editor.h"
 
@@ -14,6 +16,48 @@
 Editor::Editor(boost::property_tree::ptree& configuration) : UltimateWallpaper(configuration), m_cfg(configuration) {
 	m_fpsCounterEnableOverride = m_fpsCounterEnable;
 	m_fpsCounterEnable = false;
+
+	using namespace Renderer;
+	float vertices[18]
+	{
+		-1.f, -1.f,
+		 0.f, -1.f,
+		 1.f, -1.f,
+		 1.f,  0.f,
+		 1.f,  1.f,
+		 0.f,  1.f,
+		-1.f,  1.f,
+		-1.f,  0.f,
+		 0.f,  0.f,
+	};
+
+	auto* vb = new VertexBuffer(vertices, 18 * sizeof(float));
+	auto* vbl = new VertexBufferLayout();
+	vbl->push<float>(2);
+	auto* va = new VertexArray();
+	va->addBuffer(vb, vbl);
+
+	unsigned int indices[24]
+	{
+		0, 1,
+		1, 2,
+		2, 3,
+		3, 4,
+		4, 5,
+		5, 6,
+		6, 7,
+		7, 0,
+		1, 8,
+		3, 8,
+		5, 8,
+		7, 8,
+	};
+
+	auto* ib = new IndexBuffer(indices, 24);
+	m_gridMesh = new Mesh(va, vb, vbl, ib);
+	m_gridShader = Shader::fromFiles("resources/shaders/editor/gridVertex.shader", "resources/shaders/editor/gridFragment.shader");
+	m_gridShader->bind();
+	m_gridShader->setUniformVec4("u_gridColor", m_gridColor);
 }
 
 Editor::~Editor() = default;
@@ -26,6 +70,19 @@ void Editor::render() {
 	
 	// render wallpaper
 	UltimateWallpaper::render();
+
+	if (m_gridEnable) {
+		m_gridMesh->bind();
+		m_gridShader->bind();
+
+		const float w = m_sceneWidth * 1.1f;
+		const float h = m_sceneHeight * 1.1f;
+
+		m_gridShader->setUniformMat4("u_mvp", glm::ortho(-w, w, -h, h, -1.f, 1.f));
+
+		GL_CALL(glDrawElements(GL_LINES, m_gridMesh->getVertexCount(), GL_UNSIGNED_INT, nullptr));
+	}
+
 
 	// add ui
 	ImGui_ImplOpenGL3_NewFrame();
@@ -139,6 +196,16 @@ void Editor::render() {
 		ImGui::End();
 	}
 
+	if (ImGui::CollapsingHeader("Grid")) {
+		ImGui::Checkbox("Show grid lines", &m_gridEnable);
+		if (m_gridEnable) {
+			if (ImGui::ColorEdit4("Grid color", &m_gridColor.x, ImGuiColorEditFlags_NoInputs)) {
+				m_gridShader->bind();
+				m_gridShader->setUniformVec4("u_gridColor", m_gridColor);
+			}
+		}
+	}
+
 	if (ImGui::CollapsingHeader("Fps counter")) {
 		if (ImGui::Checkbox("Enable", &m_fpsCounterEnableOverride)) {
 			m_cfg.put("Wallpaper.FpsCounter.Enable", m_fpsCounterEnableOverride);
@@ -205,7 +272,6 @@ void Editor::render() {
 	}
 
 	ImGui::End();
-
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
@@ -265,23 +331,71 @@ void Editor::renderSlideShowSettings(const float speedMod) {
 		durChanged |= ImGui::DragInt3("Image duration (hh:mm:ss)", &durBuf[0], 1, 0, 59, "%d");
 
 		if (ImGui::TreeNode("Transition")) {
-			static char* transitions[]{ "Alpha", "Not Alpha" };
+			static char* transitions[]{ "Alpha", "Block" };
 			int selection = 0;
 			const std::string tranType = m_cfg.get<std::string>("Wallpaper.Slideshow.Transition.Type");
 			if (tranType != "Alpha") {
 				selection = 1;
 			}
 
-			if (ImGui::Combo("Type", &selection, transitions, 2)) {
-				APP_INFO("Changed transition type to {}", transitions[selection]);
-			}
-
 			auto tDur = m_cfg.get<float>("Wallpaper.Slideshow.Transition.Duration");
+			auto tBrightnessFilter = m_cfg.get<float>("Wallpaper.Slideshow.AudioResponse.BrightnessFilter");
+			auto tCellsX = m_cfg.get<int>("Wallpaper.Slideshow.Transition.Block.Cells.X");
+			auto tCellsY = m_cfg.get<int>("Wallpaper.Slideshow.Transition.Block.Cells.Y");
+			auto tDiffuseMin = m_cfg.get<float>("Wallpaper.Slideshow.Transition.Block.Diffuse.Min");
+			auto tDiffuseMax = m_cfg.get<float>("Wallpaper.Slideshow.Transition.Block.Diffuse.Max");
+
+			if (ImGui::Combo("Type", &selection, transitions, 2)) {
+				if (selection == 0) {
+					m_slideShow->setTransition(new AlphaTransition(tDur, tBrightnessFilter, m_slideShow->getTransition()->getProgress()));
+					m_cfg.put("Wallpaper.Slideshow.Transition.Type", "Alpha");
+				}
+				else {
+					m_slideShow->setTransition(new BlockTransition(tDur, tBrightnessFilter, tCellsX, tCellsY, tDiffuseMin, tDiffuseMax, m_slideShow->getTransition()->getProgress()));
+					m_cfg.put("Wallpaper.Slideshow.Transition.Type", "Block");
+				}
+			}
+			
 			if (ImGui::DragFloat("Duration", &tDur, speedMod, 0.1f, 100.f)) {
 				m_slideShow->setTransitionDuration(tDur);
 				m_cfg.put("Wallpaper.Slideshow.Transition.Duration", tDur);
 			}
+
+			if (tranType == "Block") {
+				if (ImGui::DragInt("X Cells", &tCellsX, 5.f * speedMod, 1, 500)) {
+					m_slideShow->setCellsX(tCellsX);
+					m_cfg.put("Wallpaper.Slideshow.Transition.Block.Cells.X", tCellsX);
+				}
+
+				if (ImGui::DragInt("Y Cells", &tCellsY, 5.f * speedMod, 1, 500)) {
+					m_slideShow->setCellsY(tCellsY);
+					m_cfg.put("Wallpaper.Slideshow.Transition.Block.Cells.Y", tCellsY);
+				}
+
+				if (ImGui::DragFloat("Diffuse Min", &tDiffuseMin, 0.1f * speedMod, 0.f, 1.f)) {
+					if (tDiffuseMax < tDiffuseMin) {
+						m_slideShow->setDiffuseMax(tDiffuseMin);
+						m_cfg.put("Wallpaper.Slideshow.Transition.Block.Diffuse.Max", tDiffuseMin);
+					}
+					m_slideShow->setDiffuseMin(tDiffuseMin);
+					m_cfg.put("Wallpaper.Slideshow.Transition.Block.Diffuse.Min", tDiffuseMin);
+				}
+
+				if (ImGui::DragFloat("Diffuse Max", &tDiffuseMax, 0.1f * speedMod, 0.f, 1.f)) {
+					if (tDiffuseMax < tDiffuseMin) {
+						m_slideShow->setDiffuseMin(tDiffuseMax);
+						m_cfg.put("Wallpaper.Slideshow.Transition.Block.Diffuse.Min", tDiffuseMax);
+					}
+					m_slideShow->setDiffuseMax(tDiffuseMax);
+					m_cfg.put("Wallpaper.Slideshow.Transition.Block.Diffuse.Max", tDiffuseMax);
+				}
+			}
+
 			ImGui::TreePop();
+		}
+
+		if (m_slideShow->canNextImage() && ImGui::Button("Play transition")) {
+			m_slideShow->nextImage();
 		}
 
 		if (durChanged) {
@@ -351,7 +465,7 @@ void Editor::renderEqualizerSettings(const float speedMod) {
 		m_cfg.put(id + ".BarWidth", .9);
 		m_cfg.put(id + ".BaseAmplitude", 0);
 		m_cfg.put(id + ".BaseAmplifier", 5);
-		m_cfg.put(id + ".PeakAmplifier", 1);
+		m_cfg.put(id + ".PeakAmplifier", .2);
 		m_cfg.put(id + ".Color.Alpha", .7);
 		m_cfg.put(id + ".Color.Offset", 0);
 		m_cfg.put(id + ".Color.Flow.Enable", true);
@@ -360,7 +474,8 @@ void Editor::renderEqualizerSettings(const float speedMod) {
 		m_cfg.put(id + ".Position.Y", 0);
 		m_cfg.put(id + ".Position.Angle", 0);
 		m_cfg.put(id + ".Flip", false);
-		m_cfg.put(id + ".Size", .5);
+		m_cfg.put(id + ".Size.Width", .5);
+		m_cfg.put(id + ".Size.Height", .5);
 		m_cfg.put(id + ".Ring.Radius.Inner", 1);
 		m_cfg.put(id + ".Ring.Radius.Outer", 2);
 		m_cfg.put(id + ".Ring.Rounding.Inner", true);
@@ -480,13 +595,13 @@ void Editor::renderEqualizerSettings(const float speedMod) {
 		}
 
 		auto baseAmplifier = m_cfg.get<float>(id + ".BaseAmplifier");
-		if (ImGui::DragFloat("Base amplifier", &baseAmplifier, .001f * speedMod, 0.f, 10.f)) {
+		if (ImGui::DragFloat("Base amplifier", &baseAmplifier, .01f * speedMod, 0.f, 10.f)) {
 			m_equalizers[currentEq]->setBaseAmplifier(baseAmplifier);
 			m_cfg.put(id + ".BaseAmplifier", baseAmplifier);
 		}
 
 		auto peakAmplifier = m_cfg.get<float>(id + ".PeakAmplifier");
-		if (ImGui::DragFloat("Peak amplifier", &peakAmplifier, .001f * speedMod, 0.f, 10.f)) {
+		if (ImGui::DragFloat("Peak amplifier", &peakAmplifier, .01f * speedMod, 0.f, 10.f)) {
 			m_equalizers[currentEq]->setPeakAmplifier(peakAmplifier);
 			m_cfg.put(id + ".PeakAmplifier", peakAmplifier);
 		}
@@ -546,13 +661,26 @@ void Editor::renderEqualizerSettings(const float speedMod) {
 			m_cfg.put(id + ".Position.Angle", angle);
 		}
 
-		auto size = m_cfg.get<float>(id + ".Size");
-		if (ImGui::DragFloat("Size", &size, .1f * speedMod, 0.01f, 10.f)) {
-			m_equalizers[currentEq]->setWidth(size);
-			if (currentType == 1) {
-				m_equalizers[currentEq]->setHeight(size);
+		if (currentType == 0) {
+			auto width = m_cfg.get<float>(id + ".Size.Width");
+			if (ImGui::DragFloat("Width", &width, .1f * speedMod, 0.01f, 10.f)) {
+				m_equalizers[currentEq]->setWidth(width);
+				m_cfg.put(id + ".Size.Width", width);
 			}
-			m_cfg.put(id + ".Size", size);
+
+			auto height = m_cfg.get<float>(id + ".Size.Height");
+			if (ImGui::DragFloat("Height", &height, .1f * speedMod, 0.01f, 10.f)) {
+				m_equalizers[currentEq]->setHeight(height);
+				m_cfg.put(id + ".Size.Height", height);
+			}
+		}
+		else {
+			auto size = m_cfg.get<float>(id + ".Size.Width");
+			if (ImGui::DragFloat("Size", &size, .1f * speedMod, 0.01f, 10.f)) {
+				m_equalizers[currentEq]->setWidth(size);
+				m_equalizers[currentEq]->setHeight(size);
+				m_cfg.put(id + ".Size.Width", size);
+			}
 		}
 
 		auto flip = m_cfg.get<bool>(id + ".Flip");

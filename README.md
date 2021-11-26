@@ -1,4 +1,4 @@
-# ultimate wallpaper
+# Ultimate Wallpaper
 Wallpaper for Wallpaper Engine
 
 # Requirements

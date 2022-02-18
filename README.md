@@ -1,6 +1,8 @@
 # Ultimate Wallpaper
 Wallpaper for Wallpaper Engine
 
+If you came here from the Steam Workshop see the Workshop section at the end.
+
 # Requirements
 - Windows with x86_64 architecture
 - OpenGL Version 330 or higher
@@ -41,6 +43,10 @@ Or you use the 'default-cfg'. </p>
 <p>Pressing alt while draggin a value decreases the step size</p>
 <p>Text fields are only applied if you press enter.</p>
 
+# Steam Workshop
+If you installed the Wallpaper via the Steam workshop everything above applies.
+The main difference here is that steam will automatically 'install' the Wallpaper and run the right file if you activate it.
+To use the editor or you can just right click the icon in Wallpaper Engine and select 'Open In Explorer'. This will open the folder containing the wallpaper as well as the `Editor.exe`. Just run it (double click) and you will be presented with the standalone editor window.
 
 
 # Links
